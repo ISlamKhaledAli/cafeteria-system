@@ -19,7 +19,11 @@
             <h5 class="card-title fw-bold mb-2"><?php echo $name; ?></h5>
             <div class="d-flex justify-content-between align-items-center mt-auto">
                 <span class="fs-4 fw-bold text-dark">$<?php echo number_format($price, 2); ?></span>
-                <button class="btn btn-primary rounded-pill px-4 py-2 add-to-cart-btn" style="background-color: #F59E0B; border-color: #F59E0B;">
+                <button class="btn btn-primary rounded-pill px-4 py-2 add-to-cart-btn" 
+                        data-id="<?php echo $id; ?>" 
+                        data-name="<?php echo $name; ?>" 
+                        data-price="<?php echo $price; ?>"
+                        style="background-color: #F59E0B; border-color: #F59E0B;">
                     <i class="bi bi-plus-lg me-1"></i> Add to Cart
                 </button>
             </div>
