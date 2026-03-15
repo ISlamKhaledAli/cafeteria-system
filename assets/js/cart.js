@@ -201,6 +201,63 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeCart) closeCart.addEventListener('click', closeCartSidebar);
     if (cartOverlay) cartOverlay.addEventListener('click', closeCartSidebar);
 
+    // Order Submission
+    const orderForm = document.getElementById('order-form');
+    if (orderForm) {
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            const confirmBtn = orderForm.querySelector('button[type="submit"]');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
+
+            const orderData = {
+                room: document.getElementById('room').value,
+                notes: document.getElementById('notes').value,
+                total: calculateTotal(),
+                items: cart
+            };
+
+            try {
+                // In a real MVC, this might go to a router. 
+                // For now, we'll assume a direct call or a simple endpoint.
+                // We'll point to a temporary bridge file or assume OrderController handles it.
+                // Since there's no router shown, I'll create a simple endpoint file `endpoints/confirm-order.php` 
+                // but let's try calling a potential route if it exists.
+                // Given the project structure, I'll assume we need an entry point.
+                
+                const response = await fetch('../../index.php?action=confirmOrder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Order confirmed successfully!');
+                    cart = [];
+                    saveCart();
+                    window.location.href = 'my-orders.php';
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error confirming order:', error);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        });
+    }
+
     // Initial Render
     renderCart();
 });
