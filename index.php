@@ -11,7 +11,8 @@ session_start();
 require_once __DIR__ . '/controllers/UserController.php';
 
 // تنظيف الرابط عشان نعرف المستخدم عايز أي صفحة
-$request = $_SERVER['REQUEST_URI'];
+// $request = $_SERVER['REQUEST_URI'];
+$request = $_SERVER['REQUEST_URI'] ?? '/';
 
 // تحديد المسار الأساسي للمشروع على الـ Localhost عندك
 $basePath = '/PHP/cafeteria-system'; 
