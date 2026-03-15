@@ -173,9 +173,9 @@ $products = [
                 <span class="fw-bold fs-5">Total</span>
                 <span class="fw-bold fs-4 text-primary" id="cart-total">$0.00</span>
             </div>
-            <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold" style="background-color: var(--primary-orange); border: none;">
+            <a href="cart.php" class="btn btn-primary w-100 py-3 rounded-pill fw-bold text-decoration-none d-flex align-items-center justify-content-center" style="background-color: var(--primary-orange); border: none;">
                 Checkout
-            </button>
+            </a>
         </div>
     </div>
 

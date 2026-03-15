@@ -73,43 +73,88 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!cartItemsContainer) return;
 
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = `
-                <div class="text-center text-muted py-5">
+            const emptyHtml = `
+                <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm w-100">
                     <i class="bi bi-cart fs-1 d-block mb-3"></i>
                     Your cart is empty
                 </div>
             `;
-            cartTotalElement.textContent = '$0.00';
-            cartCountBadge.textContent = '0';
+            cartItemsContainer.innerHTML = emptyHtml;
+            if (cartTotalElement) cartTotalElement.textContent = '$0.00';
+            const cartSubtotalElement = document.getElementById('cart-subtotal');
+            if (cartSubtotalElement) cartSubtotalElement.textContent = '$0.00';
+            if (cartCountBadge) cartCountBadge.textContent = '0';
             return;
         }
 
         let html = '';
         let totalCount = 0;
 
+        // Check if we are on the Cart Page or using the Sidebar
+        const isCartPage = window.location.pathname.includes('cart.php');
+
         cart.forEach(item => {
             totalCount += item.quantity;
-            html += `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <h6 class="fw-bold mb-1">${item.name}</h6>
-                        <span class="text-muted small">$${item.price.toFixed(2)}</span>
-                    </div>
-                    <div class="d-flex flex-column align-items-end gap-2">
-                        <div class="quantity-controls">
-                            <button class="btn btn-sm p-0 px-2 btn-decrease" data-id="${item.id}">-</button>
-                            <span class="fw-bold mx-1">${item.quantity}</span>
-                            <button class="btn btn-sm p-0 px-2 btn-increase" data-id="${item.id}">+</button>
+            if (isCartPage) {
+                // Large Page Layout (Matches components/cart-item.php but in JS)
+                html += `
+                    <div class="card mb-3 border-0 shadow-sm cart-item-card w-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="cart-item-info">
+                                    <h6 class="fw-bold mb-1">${item.name}</h6>
+                                    <span class="text-muted fw-bold">$${item.price.toFixed(2)}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-4">
+                                    <div class="quantity-controls d-flex align-items-center bg-light rounded-pill px-2 py-1">
+                                        <button class="btn btn-sm p-0 px-2 btn-decrease border-0" data-id="${item.id}">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <span class="fw-bold mx-2" style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                                        <button class="btn btn-sm p-0 px-2 btn-increase border-0" data-id="${item.id}">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-end" style="min-width: 80px;">
+                                        <span class="fw-bold text-dark">$${(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                    <button class="btn btn-link text-danger p-0 btn-remove" data-id="${item.id}">
+                                        <i class="bi bi-trash fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn btn-link text-danger btn-sm p-0 btn-remove" data-id="${item.id}">Remove</button>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Sidebar Layout
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h6 class="fw-bold mb-1">${item.name}</h6>
+                            <span class="text-muted small">$${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="d-flex flex-column align-items-end gap-2">
+                            <div class="quantity-controls">
+                                <button class="btn btn-sm p-0 px-2 btn-decrease" data-id="${item.id}">-</button>
+                                <span class="fw-bold mx-1">${item.quantity}</span>
+                                <button class="btn btn-sm p-0 px-2 btn-increase" data-id="${item.id}">+</button>
+                            </div>
+                            <button class="btn btn-link text-danger btn-sm p-0 btn-remove" data-id="${item.id}">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }
         });
 
         cartItemsContainer.innerHTML = html;
-        cartTotalElement.textContent = `$${calculateTotal().toFixed(2)}`;
-        cartCountBadge.textContent = totalCount;
+        const total = calculateTotal().toFixed(2);
+        if (cartTotalElement) cartTotalElement.textContent = `$${total}`;
+        
+        const cartSubtotalElement = document.getElementById('cart-subtotal');
+        if (cartSubtotalElement) cartSubtotalElement.textContent = `$${total}`;
+        
+        if (cartCountBadge) cartCountBadge.textContent = totalCount;
 
         // Re-attach event listeners for dynamic buttons
         attachItemEventListeners();
