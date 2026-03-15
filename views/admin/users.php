@@ -2,7 +2,6 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// بنستدعي الـ Header والـ Navbar من الـ Layouts المشتركة
 require_once __DIR__ . '/../../layouts/header.php';
 require_once __DIR__ . '/../../layouts/navbar.php';
 ?>
@@ -41,7 +40,6 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                 <tr>
                                     <td class="ps-4 py-3">
                                         <?php 
-                                            // بنحط صورة افتراضية لو مفيش صورة
                                             $imagePath = !empty($user['image']) ? $user['image'] : 'default.png';
                                         ?>
                                         <img src="/uploads/users/<?= htmlspecialchars($imagePath) ?>" 
@@ -113,6 +111,5 @@ require_once __DIR__ . '/../../layouts/navbar.php';
 </div>
 
 <?php 
-// استدعاء الفوتر المشترك
 require_once __DIR__ . '/../../layouts/footer.php'; 
 ?>
