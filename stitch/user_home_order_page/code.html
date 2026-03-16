@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d46c11",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221810",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Cafeteria Ordering</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 md:px-10 py-3">
+<div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-3xl">coffee</span>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">Cafeteria</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary text-sm font-semibold border-b-2 border-primary pb-1" href="#">Home</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">My Orders</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end items-center gap-4">
+<div class="relative w-full max-w-xs hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+<input class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Search drinks or snacks..." type="text"/>
+</div>
+<div class="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-4">
+<button class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</button>
+<div class="size-10 rounded-full bg-primary/10 border border-primary/20 bg-cover bg-center overflow-hidden" data-alt="User profile circular avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBl_LuRyJb_zUQAne0mfP3OHaoV0PBgkzvDfsk0FvHWy97eOVjx3S-QgYcgwfg6U-7lbWU-tQz_agY8xQRa9CrN2cQQ-QPPwxiFVlms1v0U7RIUPIJN134oTPlK8FW_riJV3c1eyAzc1oWHxOuLXgCobZwf3M6triuxg3zId9Xs9plhpbeR6yITN4WUhYyKIXD67ZTMpi3yxufQGWkwCX0AXxz-Aqlwm6Tjr3G8F9kVBbw2qBuBskrMI_HeCvcKo50S6U6RVyx0v-l_");'></div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- LEFT SIDE: Order Summary (33%) -->
+<aside class="w-full lg:w-1/3 flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden sticky top-24">
+<div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<h3 class="font-bold text-lg">Order Summary</h3>
+<span class="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">3 Items</span>
+</div>
+<!-- Selected Items List -->
+<div class="p-5 space-y-4 max-h-[40vh] overflow-y-auto">
+<!-- Item 1 -->
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="size-12 rounded-lg bg-cover bg-center" data-alt="A cup of hot latte with foam art" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAVSgOygaN8GgWXbLci_HZrFKf3bkvevNK1t4WzAEn2bqzLtohGI8gXW1gqEoexiM-o4MkWy0-IqrRTK-kqrwhiVWyexIAR65fEiQug9H1akjJbKSVWMZCjZBoRCQXh9ICwGRb6UwcBsYqm9pCL9Nb1ZW3wiLji-npTPRlh-0XK3wOSufZzFo1YYWXez747NFZ0UTBV64A_F4u1Vwm609Gi_nEJMOL-0nHkCnNHDJysLi-j4aBJmfnW9QOwwc2KrXI2YxPv7KwukykK");'></div>
+<div>
+<p class="text-sm font-semibold">Caffè Latte</p>
+<p class="text-xs text-slate-500">$3.50</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+<button class="size-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500">-</button>
+<span class="text-sm font-bold w-4 text-center">2</span>
+<button class="size-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500">+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="size-12 rounded-lg bg-cover bg-center" data-alt="Refreshing iced green tea with mint" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAk_xf3dLpUOkyEO2iHsLrbyEPkoYo8Ju6kWd6h2WVuMMgTsuPP0eupbhGhhcsu7yvmMv-z1R3nrZ9olqc--mF87NNlDGlLWqB57fI_cQ3OR6CwMjSe3XtHye7h0-_gQDVFssKGoJQbheBL5_se4rNRfhL0EW3zOvb06hfYIp-4wHtsSYBxsyxFXH2p95kvduIG-_jzTxtclqLeOxuMwaw00z-66omTiYf5-d59HUan641YZs9TsHIasOZzX1nzm3E-bIeypM2id391");'></div>
+<div>
+<p class="text-sm font-semibold">Green Tea</p>
+<p class="text-xs text-slate-500">$2.00</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+<button class="size-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500">-</button>
+<span class="text-sm font-bold w-4 text-center">1</span>
+<button class="size-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500">+</button>
+</div>
+</div>
+</div>
+<!-- Options -->
+<div class="p-5 bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
+<div>
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Delivery Room</label>
+<select class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
+<option>Meeting Room A</option>
+<option>Conference Hall B</option>
+<option>Executive Suite 101</option>
+<option>Lobby Area</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Special Notes</label>
+<textarea class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary" placeholder="e.g. Extra sugar, no ice..." rows="2"></textarea>
+</div>
+</div>
+<!-- Total & CTA -->
+<div class="p-5 border-t border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-500 font-medium">Total Price</span>
+<span class="text-2xl font-bold text-primary">$9.00</span>
+</div>
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+<span>Confirm Order</span>
+<span class="material-symbols-outlined text-xl">shopping_cart_checkout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- RIGHT SIDE: Product Grid (66%) -->
+<section class="w-full lg:w-2/3">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold">Refreshments Menu</h2>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-full bg-primary text-white text-sm font-medium">All</button>
+<button class="px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-primary/10 transition-colors">Coffee</button>
+<button class="px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-primary/10 transition-colors">Tea</button>
+<button class="px-4 py-2 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-primary/10 transition-colors">Cold Drinks</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Product Card 1 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Artistic latte art in a ceramic cup" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDX5zPdiJu4kJBE_zDcfwxhbSv-VSnfT8-8PhbXpOUZue4jo0ZU0istFL9VoO7OdN6tilEkPzgjFGA1Tcbdv0rmM1qq6m8NDmT1F-b_P7V1R90JUp37mh5Pr-tEWBFuJi1MXsLQ2ZoD3xll1XnS1b1vu2g2iJ0dFGGxJfu3RZs8vh4UukNGo4PEcaKN0YWVn8pCDcOFjl_oqbx362Nq4-zWN-8lXbLHT9OkQQKBrzD1cS4qnaYxqPXbhXSL78IIw25KkE94OUARNzAY");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$3.50</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Caffè Latte</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">Smooth espresso blended with steamed milk and a light layer of foam.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Dark roasted black coffee in a glass mug" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtJLiIA5_8d5p_zvB9HVV_N30Mw3687dTcRR5kDYC1Mip3U82DPa9F5wAUI_7Qe--85kiSWGQvR8XIo1RarBJNjy0OaP6bC0H3KeoX4ZFgpmLI7kveL20k5J5ekpOO6fvCgJqFyU4yCw1THx5exxQrhSG9eDC7q6gk58ecZUExDs3cnrpqHRm49ZS5OJugvq2Pssq6ikDVpp7V7Gm4HDaYF1GzOTLMBJV03QY4dGFpLWXq_qRUPpLQRjqfqpZos-nph0_t41EV3t05");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$2.50</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Americano</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">Rich, full-bodied espresso lengthened with hot water for a bold flavor.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Iced green tea with a lemon slice" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2ra7kfpyPYbKoomDiTQ7jOa7-GA-4lV4EHJgi7Bj_BirgwxUja1LLz7SsIIjiiFSYX45OcssJ2NOhtfmuauUTNFxvczD43-_iZvmXg87AUOmteMD1hzgCHk-7aSvL65anwBs06soqxGw8G8PbzmbJiquoN2ZdClP-L0-oxxK2NiimsbObE5Xk9-VAU_Krejei9ip0rg9zE0WXmL1Mj5He6QaJ5FcqGd5itSH_p04espY-bSaNcZgGzoFdBxPAyBMXR23BnYAEp_My");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$2.00</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Organic Green Tea</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">Refreshing and antioxidant-rich premium green tea served hot or iced.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Hot chocolate with marshmallows on top" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjgAhvPeyvk1EMCN-9DTpTu4vfNSdsZBlT4HTRppyYMWosy_1_A69r1uEVfH1olqjMywa_BhF2TEZMk0Rll2QlCsaJrFW2Ztuog6GiOqdCv8omzlO5y8zC_eXiXecq3okntWo89x7i4lfKw2qk2xInER89UPXcYWTKcAiw8o7EdJN22DAqY-sK1Fd5vBq4VugOTZDhUzEzg8YNr4EoBPqpj5VR498gErvEZVlDueOW1hwEl6YI_F36JPmWM2W3Ty7q_bCuNZizmKOH");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$4.00</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Double Choco</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">Decadent chocolate milk topped with mini marshmallows and cocoa dust.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Cold bottle of classic soda with condensation" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKZcdzAZEkLLwuuuEZ4mxXtsbtAh1uu9ihdpRWh7jW5OmOBGVQNdTvdqu5c1G02IwLIvIAEYbI-d7X3jPPbqf6h_K8pgZINmh6LM0i9brkGq2MQNirOG_6oGYvhdYsurM9sx9J6-4RoZ2Fy6EJ8OFMmdZHeTBsTLMGVrDsClMrm_CGcofGxVRLECzadNM0Q7RJtTkYVGlSxcgjdOTjqnuPVC6Lc99wtv1RpbgI7RZNwP8nlhf5nQ6Q3aROey2uzBdN-N7TKI6qFay6");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$1.50</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Sparkling Cola</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">Classic chilled soda to pair with your office snacks and meals.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 group hover:shadow-md transition-shadow">
+<div class="h-48 bg-cover bg-center relative" data-alt="Nescafe instant coffee in a blue mug" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBzDJAe8E2tWGpTQ2vlETcAHdlaOBzKBBXA9NdAyFf-PXUr4uMNC7Tz8nwPPTNscs61xffLYRlvfmKLQBA0VRvbzUKh5zJ5WZB1vUDF2ZgqFhy7uJ5Lxbk057m9XiCXK5vHj3tIZkJ9WqOFdDvhUxKH1BJbXGjZy-Et3IUf5_gBCmB32TY30DH5UaZM9HsfMTp58_VYxniiyd0AoSyQKU3uZPrLcd1B8MJXiaT2cvGzMPKHgqVFQeipzq6l8oPR5tIzLAyPsMtksCsW");'>
+<span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-primary">$2.00</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-lg mb-1">Nescafe Original</h4>
+<p class="text-slate-500 text-sm line-clamp-2 mb-4">A quick and reliable instant coffee classic for your morning boost.</p>
+<button class="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg leading-none">add</span>
+                                Add to Order
+                            </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>
