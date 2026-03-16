@@ -1,4 +1,27 @@
 <?php
+
+
+require_once "controllers/AuthController.php";
+
+$auth = new AuthController();
+
+$uri = $_SERVER['REQUEST_URI'];
+
+if($uri=="/login"){
+$auth->login();
+}
+
+elseif($uri=="/register"){
+$auth->register();
+}
+
+elseif($uri=="/logout"){
+$auth->logout();
+}
+
+else{
+$auth->login();
+}
 // إظهار الأخطاء عشان إحنا في بيئة التطوير
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -81,3 +104,4 @@ switch ($route) {
         break;
 }
 ?>
+
