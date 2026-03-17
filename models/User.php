@@ -10,42 +10,29 @@ class User {
 
     public function isEmailExists($email, $excludeId = null) {
         $query = "SELECT id FROM users WHERE email = ?";
+        $params = [$email];
+        
         if ($excludeId) {
             $query .= " AND id != ?";
+            $params[] = $excludeId;
         }
         
         $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
         
-        if ($excludeId) {
-            $stmt->bind_param("si", $email, $excludeId);
-        } else {
-            $stmt->bind_param("s", $email);
-        }
-        
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->num_rows > 0;
+        return $stmt->fetch() !== false; 
     }
     
     public function getAllUsers() {
         $query = "SELECT * FROM users";
-        $result = $this->db->query($query);
-        
-        $users = [];
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $users[] = $row;
-            }
-        }
-        return $users;
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(); 
     }
 
     public function getUserById($id) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 
     public function createUser($data) {
@@ -54,7 +41,7 @@ class User {
         
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
         
-        $stmt->bind_param("sssssss", 
+        return $stmt->execute([
             $data['name'], 
             $data['email'], 
             $hashedPassword, 
@@ -62,15 +49,12 @@ class User {
             $data['ext'], 
             $data['image'], 
             $data['role']
-        );
-        
-        return $stmt->execute();
+        ]);
     }
 
     public function updateUser($id, $data) {
         $fields = "";
         $values = [];
-        $types = "";
 
         foreach ($data as $key => $value) {
             if ($key === 'password') {
@@ -79,36 +63,26 @@ class User {
             
             $fields .= "$key = ?, ";
             $values[] = $value;
-            $types .= "s"; 
         }
 
         $fields = rtrim($fields, ", ");
-        
         $query = "UPDATE users SET $fields WHERE id = ?";
+        
+        $values[] = $id; 
+        
         $stmt = $this->db->prepare($query);
-        
-        $values[] = $id;
-        $types .= "i";
-        
-        $stmt->bind_param($types, ...$values);
-        
-        return $stmt->execute();
+        return $stmt->execute($values);
     }
 
     public function deleteUser($id) {
-        $query = "DELETE FROM users WHERE id = ?";
-        $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $id);
-        
-        return $stmt->execute();
+        $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 
     public function findUserByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $stmt->execute([$email]);
+        return $stmt->fetch();
     }
 }
 ?>

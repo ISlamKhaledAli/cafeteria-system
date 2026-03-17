@@ -1,32 +1,43 @@
 <?php
-class Database {
-    private static $instance = null;
-    private $connection;
-    private $host = "localhost";
-    private $username = "mostafamohamed";
-    private $password = "123456";
-    private $database = "cafeteria";
 
+class Database
+{
+    private static ?Database $instance = null;
+    private PDO $connection;
 
-    private function __construct() {
-        $this->connection = new mysqli($this->host, $this->username, $this->password, $this->database);
-        
-        if ($this->connection->connect_error) {
-            die("Connection failed: " . $this->connection->connect_error);
-        }
+    private function __construct()
+    {
+        $host = getenv('DB_HOST') ?: 'localhost';
+        $dbname = getenv('DB_NAME') ?: 'cafeteria';
+        $username = getenv('DB_USER') ?: 'root';
+        $password = getenv('DB_PASS') ?: '';
+
+        $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
+
+        $this->connection = new PDO($dsn, $username, $password, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
     }
 
-    private function __clone() {}
-
-    public static function getInstance() {
+    public static function getInstance(): Database
+    {
         if (self::$instance === null) {
-            self::$instance = new Database();
+            self::$instance = new self();
         }
+
         return self::$instance;
     }
 
-    public function getConnection() {
+    public function getConnection(): PDO
+    {
         return $this->connection;
     }
+
+    private function __clone()
+    {
+    }
 }
+
 ?>
