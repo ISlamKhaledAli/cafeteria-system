@@ -83,6 +83,15 @@ switch ($route) {
         $controller->index();
         break;
 
+    case '/admin/add-product':
+        $controller = new ProductController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->store();
+        } else {
+            $controller->create();
+        }
+        break;
+
     case '/admin/delete-user':
         $controller = new UserController();
         $id = $_GET['id'] ?? null;
