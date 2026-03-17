@@ -28,11 +28,13 @@ class ProductController {
              exit;
         }
 
+        $image = $this->uploadImage($_FILES['image'] ?? null);
+
         $data = [
             'name' => $name,
             'price' => $price,
             'category_id' => $category_id,
-            'image' => ''
+            'image' => $image
         ];
 
         if ($this->productModel->create($data)) {
@@ -74,9 +76,12 @@ class ProductController {
         $data = [
             'name' => $name,
             'price' => $price,
-            'category_id' => $category_id,
-            'image' => '' 
+            'category_id' => $category_id
         ];
+
+        if (!empty($_FILES['image']['name'])) {
+            $data['image'] = $this->uploadImage($_FILES['image']);
+        }
 
         if ($this->productModel->update($id, $data)) {
             header("Location: /admin/products");
@@ -95,6 +100,34 @@ class ProductController {
              header("Location: /admin/products?error=delete_failed");
              exit;
          }
+    }
+
+    private function uploadImage($file) {
+        if (empty($file['name'])) {
+            return ''; // Or return 'default.png' but view logic checks empty
+        }
+
+        $targetDir = __DIR__ . '/../uploads/products/';
+        
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        $fileExt = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        
+        if (!in_array($fileExt, $allowed)) {
+             return ''; // Invalid type
+        }
+
+        $fileName = time() . '_' . uniqid() . '.' . $fileExt;
+        $targetFilePath = $targetDir . $fileName;
+
+        if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
+            return $fileName;
+        }
+
+        return '';  
     }
 }
 ?>

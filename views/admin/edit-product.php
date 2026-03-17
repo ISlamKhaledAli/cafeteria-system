@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h3>Edit Product</h3>
-    <form action="edit-product" method="POST" enctype="multipart/form-data">
+    <form action="/admin/edit-product" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
         
         <div class="mb-3">
@@ -36,11 +36,10 @@
         </div>
         <?php endif; ?>
 
-        <!-- Image input placeholder -->
-        <!-- <div class="mb-3">
+        <div class="mb-3">
             <label for="image" class="form-label">Change Image</label>
             <input type="file" class="form-control" id="image" name="image">
-        </div> -->
+        </div>
 
         <button type="submit" class="btn btn-primary">Update</button>
         <a href="/admin/products" class="btn btn-secondary">Cancel</a>
