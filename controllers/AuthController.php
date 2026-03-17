@@ -47,8 +47,10 @@ class AuthController {
                 exit();
             }
 
-            $imageName = $this->uploadImageSecure($_FILES['image']);
-
+            // $imageName = $this->uploadImageSecure($_FILES['image']);
+            $imageName = isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE 
+             ? $this->uploadImageSecure($_FILES['image']) 
+             : 'default.png';
             $data = [
                 "name"     => $_POST['name'],
                 "email"    => $_POST['email'],
