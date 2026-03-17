@@ -24,6 +24,13 @@ class Product {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getProductById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM products WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function create($data) {
         $query = "INSERT INTO products (name, price, category_id, image) 
                   VALUES (:name, :price, :category_id, :image)";
@@ -33,6 +40,27 @@ class Product {
         $stmt->bindValue(':price', $data['price']);
         $stmt->bindValue(':category_id', $data['category_id']);
         $stmt->bindValue(':image', $data['image'] ?? '');
+        
+        return $stmt->execute();
+    }
+
+    public function update($id, $data) {
+        $query = "UPDATE products SET name = :name, price = :price, category_id = :category_id";
+        
+        if (!empty($data['image'])) {
+            $query .= ", image = :image";
+        }
+        $query .= " WHERE id = :id";
+        
+        $stmt = $this->db->prepare($query);
+        
+        $stmt->bindValue(':name', $data['name']);
+        $stmt->bindValue(':price', $data['price']);
+        $stmt->bindValue(':category_id', $data['category_id']);
+        if (!empty($data['image'])) {
+            $stmt->bindValue(':image', $data['image']);
+        }
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         
         return $stmt->execute();
     }
