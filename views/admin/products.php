@@ -1,24 +1,11 @@
-<?php
-require_once "../../config/database.php";
-
-$db = db_pdo();
-
-$stmt = $db->prepare(
-	"SELECT p.id, p.name AS product_name, p.price, p.image, c.name AS category_name
-	 FROM products p
-	 LEFT JOIN categories c ON p.category_id = c.id
-	 ORDER BY p.id DESC"
-);
-
-$stmt->execute();
-$products = $stmt->fetchAll();
-?>
-
 <?php include "../../layouts/header.php"; ?>
 
 <div class="container mt-5">
 
-<h3 class="mb-4">Products List</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Products List</h3>
+    <a href="add-product" class="btn btn-primary">Add Product</a>
+</div>
 
 <table class="table table-bordered">
 <thead>
@@ -33,28 +20,28 @@ $products = $stmt->fetchAll();
 
 <tbody>
 <?php if (!empty($products)): ?>
-	<?php foreach ($products as $product): ?>
-		<tr>
-			<td>
-				<?php if (!empty($product['image'])): ?>
-					<img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" width="60" height="60">
-				<?php else: ?>
-					No Image
-				<?php endif; ?>
-			</td>
-			<td><?php echo htmlspecialchars($product['product_name']); ?></td>
-			<td><?php echo htmlspecialchars($product['price']); ?></td>
-			<td><?php echo htmlspecialchars($product['category_name'] ?? ''); ?></td>
-			<td>
-				<button type="button" class="btn btn-sm btn-primary">Edit</button>
-				<button type="button" class="btn btn-sm btn-danger">Delete</button>
-			</td>
-		</tr>
-	<?php endforeach; ?>
+    <?php foreach ($products as $product): ?>
+        <tr>
+            <td>
+                <?php if (!empty($product['image'])): ?>
+                    <img src="/uploads/products/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" width="60" height="60">
+                <?php else: ?>
+                    <span class="text-muted">No Image</span>
+                <?php endif; ?>
+            </td>
+            <td><?php echo htmlspecialchars($product['product_name']); ?></td>
+            <td><?php echo htmlspecialchars($product['price']); ?> EGP</td>
+            <td><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></td>
+            <td>
+                <a href="edit-product?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                <a href="delete-product?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+    <?php endforeach; ?>
 <?php else: ?>
-	<tr>
-		<td colspan="5">No products found.</td>
-	</tr>
+    <tr>
+        <td colspan="5" class="text-center">No products found.</td>
+    </tr>
 <?php endif; ?>
 </tbody>
 

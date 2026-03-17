@@ -74,6 +74,15 @@ switch ($route) {
         }
         break;
 
+// ------------------------------------
+    // Product Routes
+    // ------------------------------------
+    case '/admin/products':
+        require_once 'controllers/ProductController.php';
+        $controller = new ProductController();
+        $controller->index();
+        break;
+
     case '/admin/delete-user':
         $controller = new UserController();
         $id = $_GET['id'] ?? null;
