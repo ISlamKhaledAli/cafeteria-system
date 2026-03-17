@@ -8,8 +8,6 @@ class AuthController {
 
     public function __construct(){
 
-        session_start();
-
         $this->userModel = new User();
     }
 
@@ -17,7 +15,7 @@ class AuthController {
 
         if($_SERVER['REQUEST_METHOD']=="POST"){
 
-            $email = $_POST['email'];
+            $email = trim($_POST['email']);
             $password = $_POST['password'];
 
             $user = $this->userModel->findUserByEmail($email);
@@ -25,12 +23,15 @@ class AuthController {
             if($user && password_verify($password,$user['password'])){
 
                 $_SESSION['user']=$user;
-
-                header("Location: /");
+                if($user['role']=="admin"){
+                    header("Location: /PHP/cafeteria-system/admin/users");
+                } else {
+                    header("Location: /PHP/cafeteria-system/");
+                }
                 exit;
             }
 
-            $error="Invalid Email or Password";
+            $_SESSION['error'] = "Invalid Email or Password";
         }
 
         require __DIR__."/../views/auth/login.php";
@@ -40,33 +41,33 @@ class AuthController {
 
         if($_SERVER['REQUEST_METHOD']=="POST"){
 
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $password = password_hash($_POST['password'],PASSWORD_DEFAULT);
-            $room = $_POST['room'];
-            $extension = $_POST['extension'];
-            $role = "user";
+            if ($this->userModel->isEmailExists($_POST['email'])) {
+                $_SESSION['error'] = "Email is already registered!";
+                header("Location: /PHP/cafeteria-system/register");
+                exit();
+            }
 
-            $imageName = $_FILES['image']['name'];
-            $tmp = $_FILES['image']['tmp_name'];
+            $imageName = $this->uploadImageSecure($_FILES['image']);
 
-            move_uploaded_file(
-            $tmp,
-            "uploads/users/".$imageName
-            );
+            $data = [
+                "name"     => $_POST['name'],
+                "email"    => $_POST['email'],
+                "password" => $_POST['password'],
+                "room"     => $_POST['room'],
+                "ext"      => $_POST['extension'],
+                "role"     => "user",
+                "image"    => $imageName
+            ];
 
-            $this->userModel->createUser([
-            "name"=>$name,
-            "email"=>$email,
-            "password"=>$password,
-            "room"=>$room,
-            "extension"=>$extension,
-            "role"=>$role,
-            "image"=>$imageName
-            ]);
-
-            header("Location: /login");
-            exit;
+            if ($this->userModel->createUser($data)) {
+                $_SESSION['success'] = "Account created successfully! Please login.";
+                header("Location: /PHP/cafeteria-system/login");
+                exit;
+            } else {
+                $_SESSION['error'] = "Failed to create account. Please try again.";
+                header("Location: /PHP/cafeteria-system/register");
+                exit;
+            }
         }
 
         require __DIR__."/../views/auth/register.php";
@@ -76,8 +77,27 @@ class AuthController {
 
         session_destroy();
 
-        header("Location: /login");
+        header("Location: /PHP/cafeteria-system/login");
         exit;
     }
 
+    private function uploadImageSecure($file) {
+        if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return 'default.png';
+        if ($file['size'] > 2097152) return 'default.png'; 
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        
+        if (!in_array($mime, $allowedTypes)) return 'default.png';
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $fileName = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $targetFilePath = __DIR__ . '/../uploads/users/' . $fileName;
+
+        if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
+            return $fileName;
+        }
+        return 'default.png';
+    }
 }

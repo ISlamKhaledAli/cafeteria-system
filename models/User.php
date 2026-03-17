@@ -13,17 +13,12 @@ class User {
 
     }
 
-    public function findUserByEmail($email){
-
-        $stmt = $this->db->prepare(
-        "SELECT * FROM users WHERE email = :email"
-        );
-
-        $stmt->execute([
-        "email"=>$email
-        ]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+    public function findUserByEmail($email) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 
     public function createUser($data){
