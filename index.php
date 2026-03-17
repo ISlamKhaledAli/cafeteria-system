@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 session_start();
 
 require_once __DIR__ . '/middleware/auth.php';
-// require_once __DIR__ . '/controllers/UserController.php';
+require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 
 $request = $_SERVER['REQUEST_URI'] ?? '/';
@@ -15,7 +15,7 @@ $route = str_replace($basePath, '', $request);
 $route = parse_url($route, PHP_URL_PATH);
 $route = rtrim($route, '/');
 
-// $userController = new UserController();
+$userController = new UserController();
 $authController = new AuthController();
 
 switch ($route) {
@@ -29,29 +29,29 @@ switch ($route) {
         $authController->logout();
         break;
 
-    // case '/admin/users':
-    //     AuthMiddleware::checkAdmin();
-    //     $userController->listUsers();
-    //     break;
+    case '/admin/users':
+        AuthMiddleware::checkAdmin();
+        $userController->listUsers();
+        break;
         
-    // case '/admin/add-user':
-    //     AuthMiddleware::checkAdmin();
-    //     $userController->addUser();
-    //     break;
+    case '/admin/add-user':
+        AuthMiddleware::checkAdmin();
+        $userController->addUser();
+        break;
 
-    // case '/admin/edit-user':
-    //     AuthMiddleware::checkAdmin();
-    //     $id = $_GET['id'] ?? null;
-    //     if ($id) $userController->editUser($id);
-    //     else echo "Error: User ID is missing!";
-    //     break;
+    case '/admin/edit-user':
+        AuthMiddleware::checkAdmin();
+        $id = $_GET['id'] ?? null;
+        if ($id) $userController->editUser($id);
+        else echo "Error: User ID is missing!";
+        break;
 
-    // case '/admin/delete-user':
-    //     AuthMiddleware::checkAdmin();
-    //     $id = $_GET['id'] ?? null;
-    //     if ($id) $userController->deleteUser($id);
-    //     else echo "Error: User ID is missing!";
-    //     break;
+    case '/admin/delete-user':
+        AuthMiddleware::checkAdmin();
+        $id = $_GET['id'] ?? null;
+        if ($id) $userController->deleteUser($id);
+        else echo "Error: User ID is missing!";
+        break;
 
     case '':
     case '/':
