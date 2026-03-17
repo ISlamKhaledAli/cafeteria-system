@@ -14,6 +14,11 @@ require_once __DIR__ . '/../../layouts/navbar.php';
         </a>
     </div>
 
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger shadow-sm border-0" style="border-radius: 8px;">
+            <i class="fas fa-exclamation-circle me-2"></i> <?= $_SESSION['error'] ?>
+        </div>
+    <?php unset($_SESSION['error']); endif; ?>
     <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
         <div class="card-body p-5">
             <form action="/PHP/cafeteria-system/admin/add-user" method="POST" enctype="multipart/form-data">
@@ -106,33 +111,6 @@ require_once __DIR__ . '/../../layouts/navbar.php';
     </div>
 </div>
 
-<script>
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPG, PNG, GIF, WEBP).');
-        event.target.value = ''; 
-        return;
-    }
-
-    const maxSize = 2 * 1024 * 1024; 
-    if (file.size > maxSize) {
-        alert('Image size must be less than 2MB.');
-        event.target.value = '';
-        return;
-    }
-
-    var reader = new FileReader();
-    reader.onload = function() {
-        var output = document.getElementById('imagePreview');
-        output.innerHTML = '<img src="' + reader.result + '" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">';
-        output.style.border = 'none';
-    };
-    reader.readAsDataURL(file);
-}
-</script>
+<script src="/PHP/cafeteria-system/assets/js/user-form.js"></script>
 
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>

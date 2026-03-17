@@ -24,6 +24,12 @@ class UserController {
                 'role'     => $_POST['role'] ?? 'user'
             ];
 
+            if ($this->userModel->isEmailExists($_POST['email'])) {
+                $_SESSION['error'] = "This email is already registered!";
+                header("Location: /PHP/cafeteria-system/admin/add-user");
+                exit();
+            }
+
             $data['image'] = $this->uploadImage($_FILES['image']);
 
             if ($this->userModel->createUser($data)) {

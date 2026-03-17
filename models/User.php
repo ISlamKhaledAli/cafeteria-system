@@ -8,6 +8,25 @@ class User {
         $this->db = Database::getInstance()->getConnection();
     }
 
+    public function isEmailExists($email, $excludeId = null) {
+        $query = "SELECT id FROM users WHERE email = ?";
+        if ($excludeId) {
+            $query .= " AND id != ?";
+        }
+        
+        $stmt = $this->db->prepare($query);
+        
+        if ($excludeId) {
+            $stmt->bind_param("si", $email, $excludeId);
+        } else {
+            $stmt->bind_param("s", $email);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
+    }
+    
     public function getAllUsers() {
         $query = "SELECT * FROM users";
         $result = $this->db->query($query);
