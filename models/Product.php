@@ -64,5 +64,12 @@ class Product {
         
         return $stmt->execute();
     }
+
+    public function delete($id) {
+        $query = "DELETE FROM products WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }
 ?>

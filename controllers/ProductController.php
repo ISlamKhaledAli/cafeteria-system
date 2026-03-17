@@ -75,7 +75,6 @@ class ProductController {
             'name' => $name,
             'price' => $price,
             'category_id' => $category_id,
-            // image handled later
             'image' => '' 
         ];
 
@@ -86,6 +85,16 @@ class ProductController {
              header("Location: /admin/edit-product?id=$id&error=db_error");
              exit;
         }
+    }
+
+    public function delete($id) {
+         if ($this->productModel->delete($id)) {
+             header("Location: /admin/products");
+             exit;
+         } else {
+             header("Location: /admin/products?error=delete_failed");
+             exit;
+         }
     }
 }
 ?>
