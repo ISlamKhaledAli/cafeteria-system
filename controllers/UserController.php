@@ -33,6 +33,7 @@ class UserController {
             $data['image'] = $this->uploadImage($_FILES['image']);
 
             if ($this->userModel->createUser($data)) {
+                $_SESSION['success'] = "User added successfully!";
                 header("Location: /PHP/cafeteria-system/admin/users");
                 exit();
             } else {
@@ -72,6 +73,7 @@ class UserController {
             }
 
             if ($this->userModel->updateUser($id, $data)) {
+                $_SESSION['success'] = "User updated successfully!";
                 header("Location: /PHP/cafeteria-system/admin/users");
                 exit();
             }
@@ -92,6 +94,7 @@ class UserController {
         }
 
         $this->userModel->deleteUser($id);
+        $_SESSION['success'] = "User deleted successfully!";
         header("Location: /PHP/cafeteria-system/admin/users");
         exit();
     }

@@ -65,7 +65,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                         <a href="/PHP/cafeteria-system/admin/edit-user?id=<?= $user['id'] ?>" class="text-secondary me-3 text-decoration-none">
                                             <i class="fas fa-pen text-muted hover-warning transition"></i>
                                         </a>
-                                        <a href="/PHP/cafeteria-system/admin/delete-user?id=<?= $user['id'] ?>" class="text-secondary text-decoration-none" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
+                                        <a href="javascript:void(0);" class="text-secondary text-decoration-none" onclick="confirmDelete(<?= $user['id'] ?>)">
                                             <i class="fas fa-trash text-muted hover-danger transition"></i>
                                         </a>
                                     </td>
@@ -98,4 +98,22 @@ require_once __DIR__ . '/../../layouts/navbar.php';
     </div>
 </div>
 <script src="/PHP/cafeteria-system/assets/js/users-table.js"></script>
+<script>
+function confirmDelete(userId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this user data!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/PHP/cafeteria-system/admin/delete-user?id=${userId}`;
+        }
+    });
+}
+</script>
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>
