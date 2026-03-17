@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
         <div class="d-flex gap-3 align-items-center">
             <div class="position-relative">
                 <i class="fas fa-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
-                <input type="text" class="form-control ps-5 bg-white border" placeholder="Search users..." style="border-radius: 8px; border-color: #eaeaea !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <input type="text" id="searchInput" class="form-control ps-5 bg-white border" placeholder="Search users..." style="border-radius: 8px; border-color: #eaeaea !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
             </div>
             <a href="/PHP/cafeteria-system/admin/add-user" class="btn text-white fw-semibold shadow-sm" style="background-color: #d97706; border-radius: 8px; padding: 8px 20px;">
                 <i class="fas fa-user-plus me-2"></i> Add User
@@ -34,7 +34,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                             <th class="text-end pe-4 fw-bold border-bottom py-3">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="border-top-0 bg-white">
+                    <tbody id="usersTableBody" class="border-top-0 bg-white">
                         <?php if (!empty($users)): ?>
                             <?php foreach ($users as $user): ?>
                                 <tr>
@@ -97,5 +97,5 @@ require_once __DIR__ . '/../../layouts/navbar.php';
         </div>
     </div>
 </div>
-
+<script src="/PHP/cafeteria-system/assets/js/users-table.js"></script>
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>
