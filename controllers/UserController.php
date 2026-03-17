@@ -51,8 +51,18 @@ class UserController {
                 $data['password'] = $_POST['password'];
             }
 
+            $oldUser = $this->userModel->getUserById($id);
+
             if (!empty($_FILES['image']['name'])) {
-                $data['image'] = $this->uploadImage($_FILES['image']);
+                $newImage = $this->uploadImage($_FILES['image']);
+                
+                if ($newImage !== 'default.png') {
+                    $data['image'] = $newImage;
+                    
+                    if ($oldUser['image'] !== 'default.png' && file_exists(__DIR__ . '/../uploads/users/' . $oldUser['image'])) {
+                        unlink(__DIR__ . '/../uploads/users/' . $oldUser['image']);
+                    }
+                }
             }
 
             if ($this->userModel->updateUser($id, $data)) {
@@ -66,27 +76,63 @@ class UserController {
     }
 
     public function deleteUser($id) {
+        $user = $this->userModel->getUserById($id);
+
+        if ($user && $user['image'] !== 'default.png') {
+            $imagePath = __DIR__ . '/../uploads/users/' . $user['image'];
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
         $this->userModel->deleteUser($id);
         header("Location: /PHP/cafeteria-system/admin/users");
         exit();
     }
 
     private function uploadImage($file) {
-        if (empty($file['name'])) {
-            return 'default.png'; 
+        if (!isset($file['error']) || is_array($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+            // return 'default.png';
+            die("Debug: الصورة لم تصل للـ Backend بشكل صحيح. تأكد من وجود enctype في الفورم.");
+        }
+
+        if ($file['size'] > 2097152) {
+            // return 'default.png'; 
+            die("Debug: حجم الصورة أكبر من 2 ميجا.");        
+        }
+
+        $allowedTypes = [
+            'jpg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp'=> 'image/webp'
+        ];
+        
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        $ext = array_search($mime, $allowedTypes, true);
+
+        if ($ext === false) {
+            die("Debug: الملف المرفوع ليس صورة مدعومة. الـ MIME المقروء هو: " . $mime);
+            // return 'default.png'; 
         }
 
         $targetDir = __DIR__ . '/../uploads/users/';
-        
         if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
+            // mkdir($targetDir, 0777, true);
+            if (!mkdir($targetDir, 0777, true)) {
+                die("Debug: فشل في إنشاء مجلد uploads/users/. تأكد من صلاحيات Ubuntu.");
+            }
         }
 
-        $fileName = time() . '_' . basename($file["name"]);
+        $fileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
         $targetFilePath = $targetDir . $fileName;
 
         if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
             return $fileName;
+        }
+        else {
+            die("Debug: فشل في نقل الصورة (move_uploaded_file). الأباتشي لا يملك صلاحيات الكتابة في المجلد!");
         }
 
         return 'default.png';  

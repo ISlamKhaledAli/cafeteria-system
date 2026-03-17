@@ -107,12 +107,30 @@ require_once __DIR__ . '/../../layouts/navbar.php';
 
 <script>
 function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please select a valid image file (JPG, PNG, GIF, WEBP).');
+        event.target.value = ''; 
+        return;
+    }
+
+    const maxSize = 2 * 1024 * 1024; 
+    if (file.size > maxSize) {
+        alert('Image size must be less than 2MB.');
+        event.target.value = '';
+        return;
+    }
+
     var reader = new FileReader();
     reader.onload = function() {
         var output = document.getElementById('imagePreview');
         output.innerHTML = '<img src="' + reader.result + '" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">';
+        output.style.border = 'none';
     };
-    reader.readAsDataURL(event.target.files[0]);
+    reader.readAsDataURL(file);
 }
 </script>
 
