@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h3>Add Product</h3>
-    <form action="add-product" method="POST" enctype="multipart/form-data">
+    <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="product_name" class="form-label">Product</label>
             <input type="text" class="form-control" id="product_name" name="product_name" required>
@@ -23,11 +23,10 @@
             </select>
         </div>
         
-        <!-- Image input placeholder for next feature -->
-        <!-- <div class="mb-3">
+        <div class="mb-3">
             <label for="image" class="form-label">Product Image</label>
             <input type="file" class="form-control" id="image" name="image">
-        </div> -->
+        </div>
 
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="reset" class="btn btn-secondary">Reset</button>
