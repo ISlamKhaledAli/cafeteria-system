@@ -24,7 +24,7 @@ class ProductController {
         $category_id = $_POST['category_id'] ?? null;
         
         if (empty($name) || empty($price) || empty($category_id)) {
-             header("Location: /admin/add-product?error=missing_fields");
+             header("Location: /PHP/cafeteria-system/admin/add-product?error=missing_fields");
              exit;
         }
 
@@ -38,10 +38,10 @@ class ProductController {
         ];
 
         if ($this->productModel->create($data)) {
-            header("Location: /admin/products");
+            header("Location: /PHP/cafeteria-system/admin/products");
             exit;
         } else {
-             header("Location: /admin/add-product?error=db_error");
+             header("Location: /PHP/cafeteria-system/admin/add-product?error=db_error");
              exit;
         }
     }
@@ -49,7 +49,7 @@ class ProductController {
     public function edit() {
         $id = $_GET['id'] ?? null;
         if (!$id) {
-             header("Location: /admin/products");
+             header("Location: /PHP/cafeteria-system/admin/products");
              exit;
         }
         $product = $this->productModel->getProductById($id);
@@ -60,7 +60,7 @@ class ProductController {
     public function update() {
         $id = $_POST['product_id'] ?? null;
         if (!$id) {
-             header("Location: /admin/products");
+             header("Location: /PHP/cafeteria-system/admin/products");
              exit;
         }
 
@@ -69,7 +69,7 @@ class ProductController {
         $category_id = $_POST['category_id'] ?? null;
 
         if (empty($name) || empty($price) || empty($category_id)) {
-             header("Location: /admin/edit-product?id=$id&error=missing_fields");
+             header("Location: /PHP/cafeteria-system/admin/edit-product?id=$id&error=missing_fields");
              exit;
         }
 
@@ -84,20 +84,20 @@ class ProductController {
         }
 
         if ($this->productModel->update($id, $data)) {
-            header("Location: /admin/products");
+            header("Location: /PHP/cafeteria-system/admin/products");
             exit;
         } else {
-             header("Location: /admin/edit-product?id=$id&error=db_error");
+             header("Location: /PHP/cafeteria-system/admin/edit-product?id=$id&error=db_error");
              exit;
         }
     }
 
     public function delete($id) {
          if ($this->productModel->delete($id)) {
-             header("Location: /admin/products");
+             header("Location: /PHP/cafeteria-system/admin/products");
              exit;
          } else {
-             header("Location: /admin/products?error=delete_failed");
+             header("Location: /PHP/cafeteria-system/admin/products?error=delete_failed");
              exit;
          }
     }

@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/middleware/auth.php';
 require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/AuthController.php';
+require_once __DIR__ . '/controllers/ProductController.php';
 
 $request = $_SERVER['REQUEST_URI'] ?? '/';
 $basePath = '/PHP/cafeteria-system'; 
@@ -51,6 +52,43 @@ switch ($route) {
         $id = $_GET['id'] ?? null;
         if ($id) $userController->deleteUser($id);
         else echo "Error: User ID is missing!";
+        break;
+    
+    case '/admin/products':
+        AuthMiddleware::checkAdmin();
+        $controller = new ProductController();
+        $controller->index();
+        break;
+
+    case '/admin/add-product':
+        AuthMiddleware::checkAdmin();
+        $controller = new ProductController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->store();
+        } else {
+            $controller->create();
+        }
+        break;
+
+    case '/admin/edit-product':
+        AuthMiddleware::checkAdmin();
+        $controller = new ProductController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->update();
+        } else {
+            $controller->edit();
+        }
+        break;
+
+    case '/admin/delete-product':
+        AuthMiddleware::checkAdmin();
+        $controller = new ProductController();
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $controller->delete($id);
+        } else {
+            header("Location: $basePath/admin/products");
+        }
         break;
 
     case '':
