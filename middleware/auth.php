@@ -1,10 +1,19 @@
 <?php
+/**
+ * Auth Middleware - Cafeteria System
+ * FIXED: Redirect to correct routing format (index.php?page=login).
+ */
 
 class AuthMiddleware {
 
     public static function checkLogin() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if (!isset($_SESSION['user'])) {
-            header("Location: /PHP/cafeteria-system/login");
+            // FIXED: Redirection path
+            header("Location: index.php?page=login");
             exit;
         }
     }
@@ -19,3 +28,4 @@ class AuthMiddleware {
     }
 
 }
+?>

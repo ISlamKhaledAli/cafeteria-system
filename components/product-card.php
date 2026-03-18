@@ -1,53 +1,53 @@
 <?php
 /**
  * Product Card Component
- * 
- * @param string $name Product Name
- * @param float $price Product Price
- * @param string $image Product Image URL
+ * FIXED: Alignment of price badge, image fallback, and button spacing.
  */
 ?>
 <div class="col">
-    <div class="card h-100 border-0 shadow-sm product-card transition-hover">
-        <div class="position-relative overflow-hidden">
-            <img src="<?php echo $image; ?>" class="card-img-top product-image" alt="<?php echo $name; ?>" style="height: 200px; object-fit: cover;">
-            <div class="product-badge position-absolute top-0 start-0 m-2">
-                <span class="badge bg-warning text-dark px-2 py-1 shadow-sm" style="background-color: #F59E0B !important;">New</span>
-            </div>
+    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative animate-fade-in bg-white" style="transition: transform 0.3s ease;">
+        <!-- Price Badge: Absolute positioned correctly -->
+        <div class="position-absolute top-0 end-0 m-3 z-1">
+            <span class="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 fw-bold" style="border: 1px solid #eee;">
+                $<?= number_format($product['price'], 2) ?>
+            </span>
         </div>
-        <div class="card-body d-flex flex-column p-4">
-            <h5 class="card-title fw-bold mb-2"><?php echo $name; ?></h5>
-            <div class="d-flex justify-content-between align-items-center mt-auto">
-                <span class="fs-4 fw-bold text-dark">$<?php echo number_format($price, 2); ?></span>
-                <button class="btn btn-primary rounded-pill px-4 py-2 add-to-cart-btn" 
-                        data-id="<?php echo $id; ?>" 
-                        data-name="<?php echo $name; ?>" 
-                        data-price="<?php echo $price; ?>"
-                        style="background-color: #F59E0B; border-color: #F59E0B;">
-                    <i class="bi bi-plus-lg me-1"></i> Add to Cart
-                </button>
-            </div>
+        
+        <!-- Image Container -->
+        <div class="bg-light" style="height: 200px; overflow: hidden;">
+            <?php 
+                $image_path = "uploads/products/" . $product['image'];
+                $display_image = (!empty($product['image']) && file_exists(BASE_PATH . "/" . $image_path)) 
+                    ? $image_path 
+                    : 'assets/images/default-product.png';
+            ?>
+            <img src="<?= $display_image ?>" 
+                 class="w-100 h-100 object-fit-cover product-img" 
+                 alt="<?= htmlspecialchars($product['name']) ?>"
+                 onerror="this.src='https://placehold.co/400x300?text=<?= urlencode($product['name']) ?>'">
+        </div>
+
+        <div class="card-body p-4 d-flex flex-column">
+            <h5 class="fw-bold text-dark mb-2"><?= htmlspecialchars($product['name']) ?></h5>
+            <p class="text-muted small mb-4 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                <?= htmlspecialchars($product['description'] ?? 'Deliciously prepared using fresh ingredients for your peak performance.') ?>
+            </p>
+            
+            <button class="btn w-100 rounded-pill py-2 fw-bold btn-add-to-cart" 
+                    data-id="<?= $product['id'] ?>"
+                    data-name="<?= htmlspecialchars($product['name']) ?>"
+                    data-price="<?= $product['price'] ?>"
+                    data-image="<?= $product['image'] ?>"
+                    style="background-color: #FFF7ED; color: #F59E0B; border: none; transition: all 0.2s;">
+                <i class="bi bi-plus-lg me-2"></i>Add to Order
+            </button>
         </div>
     </div>
 </div>
 
 <style>
-    .product-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-radius: 12px;
-    }
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .product-image {
-        transition: transform 0.5s ease;
-    }
-    .product-card:hover .product-image {
-        transform: scale(1.05);
-    }
-    .add-to-cart-btn:hover {
-        background-color: #D97706 !important;
-        border-color: #D97706 !important;
-    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.08) !important; }
+    .card:hover .btn-add-to-cart { background-color: #F59E0B !important; color: white !important; }
+    .product-img { transition: transform 0.5s ease; }
+    .card:hover .product-img { transform: scale(1.1); }
 </style>

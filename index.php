@@ -1,110 +1,86 @@
 <?php
+/**
+ * Main Entry Point - Cafeteria System
+ * Handles: Simple Routing (?page=...), Session, and Auth Middleware.
+ */
+
+// 1. Error Reporting (Development)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
+// 2. Start Session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-require_once __DIR__ . '/middleware/auth.php';
-require_once __DIR__ . '/controllers/UserController.php';
-require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/controllers/ProductController.php';
+// 3. Define Root Path for easy referencing
+define('BASE_PATH', __DIR__);
 
-$request = $_SERVER['REQUEST_URI'] ?? '/';
-$basePath = '/PHP/cafeteria-system'; 
-$route = str_replace($basePath, '', $request);
-$route = parse_url($route, PHP_URL_PATH);
-$route = rtrim($route, '/');
+// 4. Core Requirements
+require_once BASE_PATH . '/config/Database.php';
+require_once BASE_PATH . '/middleware/auth.php';
+require_once BASE_PATH . '/controllers/UserController.php';
+require_once BASE_PATH . '/controllers/AuthController.php';
+require_once BASE_PATH . '/controllers/ProductController.php';
+require_once BASE_PATH . '/controllers/OrderController.php';
 
-$userController = new UserController();
+// 5. Simple Routing Logic
+$page = $_GET['page'] ?? 'home'; 
+
+// User Controllers
+$orderController = new OrderController();
 $authController = new AuthController();
+$productController = new ProductController();
 
-switch ($route) {
-    case '/login':
+// 6. Route Selection
+switch ($page) {
+    // --- Auth Routes ---
+    case 'login':
         $authController->login();
         break;
-    case '/register':
+    case 'register':
         $authController->register();
         break;
-    case '/logout':
+    case 'logout':
         $authController->logout();
         break;
 
-    case '/admin/users':
-        AuthMiddleware::checkAdmin();
-        $userController->listUsers();
-        break;
-        
-    case '/admin/add-user':
-        AuthMiddleware::checkAdmin();
-        $userController->addUser();
+    // --- User Ordering Routes (Protected) ---
+    case 'home':
+        AuthMiddleware::checkLogin(); // FIXED: Enforce login
+        require_once BASE_PATH . '/views/user/home.php';
         break;
 
-    case '/admin/edit-user':
-        AuthMiddleware::checkAdmin();
-        $id = $_GET['id'] ?? null;
-        if ($id) $userController->editUser($id);
-        else echo "Error: User ID is missing!";
+    case 'cart':
+        AuthMiddleware::checkLogin(); // FIXED: Enforce login
+        require_once BASE_PATH . '/views/user/cart.php';
         break;
 
-    case '/admin/delete-user':
-        AuthMiddleware::checkAdmin();
-        $id = $_GET['id'] ?? null;
-        if ($id) $userController->deleteUser($id);
-        else echo "Error: User ID is missing!";
-        break;
-    
-    case '/admin/products':
-        AuthMiddleware::checkAdmin();
-        $controller = new ProductController();
-        $controller->index();
+    case 'orders':
+        AuthMiddleware::checkLogin(); // FIXED: Enforce login
+        $orderController->myOrders();
         break;
 
-    case '/admin/add-product':
+    case 'confirm-order':
+        $orderController->confirmOrder();
+        break;
+
+    // --- Admin Routes ---
+    case 'admin-users':
         AuthMiddleware::checkAdmin();
-        $controller = new ProductController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->store();
-        } else {
-            $controller->create();
-        }
+        (new UserController())->listUsers();
         break;
 
-    case '/admin/edit-product':
+    case 'admin-products':
         AuthMiddleware::checkAdmin();
-        $controller = new ProductController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->update();
-        } else {
-            $controller->edit();
-        }
+        $productController->index();
         break;
 
-    case '/admin/delete-product':
-        AuthMiddleware::checkAdmin();
-        $controller = new ProductController();
-        $id = $_GET['id'] ?? null;
-        if ($id) {
-            $controller->delete($id);
-        } else {
-            header("Location: $basePath/admin/products");
-        }
-        break;
-
-    case '':
-    case '/':
-        AuthMiddleware::checkLogin();
-        echo "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>";
-        echo "<h1>Welcome to Cafeteria, " . htmlspecialchars($_SESSION['user']['name']) . "!</h1>";
-        if ($_SESSION['user']['role'] === 'admin') {
-            echo "<br><a href='$basePath/admin/users' style='padding:10px 20px; background:#d97706; color:#fff; text-decoration:none; border-radius:5px;'>Go to Users Management</a>";
-        }
-        echo "<br><br><a href='$basePath/logout' style='color:red;'>Logout</a>";
-        echo "</div>";
-        break;
-
+    // --- Default / 404 ---
     default:
         http_response_code(404);
-        echo "<h1 style='text-align:center; margin-top:50px;'>404 - Page Not Found</h1>";
+        require_once BASE_PATH . '/views/404.php'; // Optional view or inline
         break;
 }
+?>

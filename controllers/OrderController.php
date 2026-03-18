@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../models/OrderItem.php';
 
@@ -13,84 +12,84 @@ class OrderController {
     }
 
     /**
-     * Confirm a new order
-     * Expects JSON input via POST
+     * Handle the order confirmation from the cart.
+     * FIXED: Ensure variable names align with fixed Model methods.
      */
     public function confirmOrder() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
-            return;
-        }
-
-        // Initialize session if not started
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Get user ID from session (fallback to dummy for now if not set)
-        $userId = $_SESSION['user_id'] ?? 1; 
-
-        // Get POST data
+        // Get raw POST data (JSON)
         $data = json_decode(file_get_contents('php://input'), true);
-
+        
         if (!$data) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'No data received']);
-            return;
+            $this->jsonResponse(false, 'Invalid order data received.');
         }
 
-        $room_no = $data['room_no'] ?? '';
+        $userId = $data['user_id'] ?? null;
+        $roomNo = $data['room_no'] ?? ''; // Maps to room_no in DB
         $notes = $data['notes'] ?? '';
-        $total = $data['total'] ?? 0;
         $items = $data['items'] ?? [];
 
-        if (empty($room_no) || empty($items)) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Missing required fields']);
-            return;
+        if (!$userId || !$roomNo || empty($items)) {
+            $this->jsonResponse(false, 'Required fields are missing.');
         }
 
-        // Start Transaction (using mysqli directly from model's DB connection would be better, 
-        // but since models create their own connections, we'll assume the connection is shared or handled)
-        // For simplicity with the provided db() function, we'll just proceed.
+        // Calculate total price server-side
+        $total_price = 0;
+        foreach ($items as $item) {
+            $total_price += $item['price'] * $item['quantity'];
+        }
+
+        // Create the Order entry (matches total_price, room_no)
+        $orderId = $this->orderModel->createOrder($userId, $roomNo, $notes, $total_price);
         
-        $orderId = $this->orderModel->createOrder($userId, $room_no, $notes, $total);
-
         if ($orderId) {
-            foreach ($items as $item) {
-                $this->orderItemModel->addOrderItem(
-                    $orderId, 
-                    $item['id'], 
-                    $item['quantity'], 
-                    $item['price']
-                );
+            // Add items to order_items table
+            if ($this->orderItemModel->addItems($orderId, $items)) {
+                $this->jsonResponse(true, 'Order confirmed successfully!', ['order_id' => $orderId]);
+            } else {
+                $this->jsonResponse(false, 'Order created but failed to add items.');
             }
-
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'order_id' => $orderId]);
         } else {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Failed to create order']);
+            $this->jsonResponse(false, 'Critical error: Failed to generate order.');
         }
     }
 
     /**
-     * Get orders for the current user
+     * List user orders for the "My Orders" page.
+     * FIXED: Redirect to index.php?page=login
      */
-    public function getUserOrders() {
+    public function myOrders() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        $userId = $_SESSION['user_id'] ?? 1;
-        $orders = $this->orderModel->getOrdersByUser($userId);
-        
-        // Optionally attach items to each order
-        foreach ($orders as &$order) {
-            $order['items'] = $this->orderItemModel->getOrderItems($order['id']);
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            header('Location: index.php?page=login');
+            exit;
         }
 
-        return $orders;
+        $orders = $this->orderModel->getOrdersByUserId($userId);
+        
+        // Fetch items for each order to display in the history
+        foreach ($orders as &$order) {
+            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
+        }
+        
+        // Pass data to correctly path-defined view
+        require_once BASE_PATH . '/views/user/my-orders.php';
+    }
+
+    /**
+     * JSON helper for API responses.
+     */
+    private function jsonResponse($success, $message, $data = []) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success, 
+            'message' => $message, 
+            'data'    => $data
+        ]);
+        exit;
     }
 }
+?>
