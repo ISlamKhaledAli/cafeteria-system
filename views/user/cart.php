@@ -102,8 +102,8 @@
 
                     <form id="order-form">
                         <div class="mb-3">
-                            <label for="room" class="form-label fw-bold">Delivery Room</label>
-                            <select class="form-select" id="room" required>
+                            <label for="room_no" class="form-label fw-bold">Delivery Room</label>
+                            <select class="form-select" id="room_no" required>
                                 <option value="" selected disabled>Select a room</option>
                                 <option value="1">Room 1</option>
                                 <option value="2">Room 2</option>

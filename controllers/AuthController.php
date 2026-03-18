@@ -55,8 +55,8 @@ class AuthController {
                 "name"     => $_POST['name'],
                 "email"    => $_POST['email'],
                 "password" => $_POST['password'],
-                "room"     => $_POST['room'],
-                "ext"      => $_POST['extension'],
+                "room_no"  => $_POST['room_no'],
+                "ext"      => $_POST['ext'],
                 "role"     => "user",
                 "image"    => $imageName
             ];

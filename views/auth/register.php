@@ -22,10 +22,10 @@
                     <input type="password" name="password" class="form-control" placeholder="Password" required minlength="6">
                 </div>
                 <div class="mb-3">
-                    <input name="room" class="form-control" placeholder="Room Number">
+                    <input name="room_no" class="form-control" placeholder="Room Number">
                 </div>
                 <div class="mb-3">
-                    <input name="extension" class="form-control" placeholder="Extension">
+                    <input name="ext" class="form-control" placeholder="Extension">
                 </div>
                 <div class="mb-3">
                     <label class="form-label small text-muted">Profile Image (Optional)</label>

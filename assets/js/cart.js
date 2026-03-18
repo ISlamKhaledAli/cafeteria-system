@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
 
             const orderData = {
-                room: document.getElementById('room').value,
+                room_no: document.getElementById('room_no').value,
                 notes: document.getElementById('notes').value,
                 total: calculateTotal(),
                 items: cart

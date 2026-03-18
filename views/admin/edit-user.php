@@ -87,7 +87,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                         <label class="form-label text-dark fw-semibold small">Room Number</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-door-closed"></i></span>
-                            <input type="text" class="form-control bg-light border-0 py-2" name="room" value="<?= htmlspecialchars($user['room']) ?>" required style="border-radius: 0 8px 8px 0;">
+                            <input type="text" class="form-control bg-light border-0 py-2" name="room_no" value="<?= htmlspecialchars($user['room_no']) ?>" required style="border-radius: 0 8px 8px 0;">
                         </div>
                     </div>
                     <div class="col-md-6 mt-4 mt-md-0">

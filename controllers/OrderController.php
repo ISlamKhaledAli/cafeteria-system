@@ -40,12 +40,12 @@ class OrderController {
             return;
         }
 
-        $room = $data['room'] ?? '';
+        $room_no = $data['room_no'] ?? '';
         $notes = $data['notes'] ?? '';
         $total = $data['total'] ?? 0;
         $items = $data['items'] ?? [];
 
-        if (empty($room) || empty($items)) {
+        if (empty($room_no) || empty($items)) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Missing required fields']);
             return;
@@ -55,7 +55,7 @@ class OrderController {
         // but since models create their own connections, we'll assume the connection is shared or handled)
         // For simplicity with the provided db() function, we'll just proceed.
         
-        $orderId = $this->orderModel->createOrder($userId, $room, $notes, $total);
+        $orderId = $this->orderModel->createOrder($userId, $room_no, $notes, $total);
 
         if ($orderId) {
             foreach ($items as $item) {

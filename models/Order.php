@@ -9,9 +9,9 @@ class Order {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function createOrder($userId, $room, $notes, $total) {
+    public function createOrder($userId, $room_no, $notes, $total) {
         $stmt = $this->db->prepare("INSERT INTO orders (user_id, room_no, notes, total_price, status, order_date) VALUES (?, ?, ?, ?, 'processing', NOW())");
-        if ($stmt->execute([$userId, $room, $notes, $total])) {
+        if ($stmt->execute([$userId, $room_no, $notes, $total])) {
             return $this->db->lastInsertId();
         }
         return false;

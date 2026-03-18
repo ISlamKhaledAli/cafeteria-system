@@ -52,7 +52,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                     
                                     <td>
                                         <span class="badge text-secondary border px-3 py-2 rounded-pill" style="background-color: #f3f4f6; font-weight: 500;">
-                                            Room <?= htmlspecialchars($user['room']) ?>
+                                            Room <?= htmlspecialchars($user['room_no']) ?>
                                         </span>
                                     </td>
                                     

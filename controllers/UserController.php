@@ -19,7 +19,7 @@ class UserController {
                 'name'     => $_POST['name'],
                 'email'    => $_POST['email'],
                 'password' => $_POST['password'],
-                'room'     => $_POST['room'],
+                'room_no'  => $_POST['room_no'],
                 'ext'      => $_POST['ext'],
                 'role'     => $_POST['role'] ?? 'user'
             ];
@@ -49,7 +49,7 @@ class UserController {
             $data = [
                 'name'  => $_POST['name'],
                 'email' => $_POST['email'],
-                'room'  => $_POST['room'],
+                'room_no' => $_POST['room_no'],
                 'ext'   => $_POST['ext'],
                 'role'  => $_POST['role']
             ];

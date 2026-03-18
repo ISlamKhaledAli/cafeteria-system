@@ -36,7 +36,7 @@ class User {
     }
 
     public function createUser($data) {
-        $query = "INSERT INTO users (name, email, password, room, ext, image, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO users (name, email, password, room_no, ext, image, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($query);
         
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -45,7 +45,7 @@ class User {
             $data['name'], 
             $data['email'], 
             $hashedPassword, 
-            $data['room'], 
+            $data['room_no'], 
             $data['ext'], 
             $data['image'], 
             $data['role']
