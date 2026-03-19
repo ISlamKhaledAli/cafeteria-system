@@ -1,263 +1,237 @@
 /**
- * Cafeteria System - Cart Logic
+ * Cart & Menu Logic - Cafeteria System
+ * UPDATED: Added Nav Badge support and Room Selection sync.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // State
-    let cart = JSON.parse(localStorage.getItem('cafeteria_cart')) || [];
+const Cart = {
+    items: JSON.parse(localStorage.getItem('user_cart')) || [],
 
-    // DOM Elements
-    const cartToggle = document.getElementById('cart-toggle');
-    const closeCart = document.getElementById('close-cart');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    const cartOverlay = document.getElementById('cart-overlay');
-    const cartItemsContainer = document.getElementById('cart-items');
-    const cartTotalElement = document.getElementById('cart-total');
-    const cartCountBadge = document.getElementById('cart-count-badge');
+    init() {
+        this.updateTotal();
+        this.render();
+        this.setupEvents();
+        this.syncRoomSelection();
+        console.log("Cart System Ready (EGP)");
+    },
 
-    // --- Core Functions ---
-
-    function saveCart() {
-        localStorage.setItem('cafeteria_cart', JSON.stringify(cart));
-        renderCart();
-    }
-
-    function addToCart(productId, name, price) {
-        const existingItem = cart.find(item => item.id === productId);
-        if (existingItem) {
-            existingItem.quantity += 1;
+     addToCart(product) {
+        const index = this.items.findIndex(p => p.id === product.id);
+        if (index > -1) {
+            this.items[index].quantity += 1;
         } else {
-            cart.push({
-                id: productId,
-                name: name,
-                price: parseFloat(price),
-                quantity: 1
-            });
+            this.items.push({ ...product, quantity: 1 });
         }
-        saveCart();
-        openCartSidebar();
-    }
+        this.save();
+        this.showFeedback(`${product.name} added to order!`);
+    },
 
-    function increaseQuantity(productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            item.quantity += 1;
-            saveCart();
+    increaseQuantity(id) {
+        const item = this.items.find(p => p.id === id);
+        if (item) { item.quantity += 1; this.save(); }
+    },
+
+    decreaseQuantity(id) {
+        const index = this.items.findIndex(p => p.id === id);
+        if (index > -1) {
+            this.items[index].quantity -= 1;
+            if (this.items[index].quantity <= 0) this.items.splice(index, 1);
+            this.save();
         }
-    }
+    },
 
-    function decreaseQuantity(productId) {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            item.quantity -= 1;
-            if (item.quantity <= 0) {
-                removeItem(productId);
-            } else {
-                saveCart();
-            }
+    removeItem(id) {
+        this.items = this.items.filter(p => p.id !== id);
+        this.save();
+    },
+
+     updateTotal() {
+        const subtotal = this.items.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+        const count = this.items.reduce((sum, p) => sum + p.quantity, 0);
+        const formattedTotal = subtotal.toFixed(2);
+        
+        document.querySelectorAll('#cart-total').forEach(el => el.innerText = `${formattedTotal} EGP`);
+        document.querySelectorAll('#cart-count').forEach(el => el.innerText = `${this.items.length} Items`);
+
+         const badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'block' : 'none';
         }
-    }
 
-    function removeItem(productId) {
-        cart = cart.filter(item => item.id !== productId);
-        saveCart();
-    }
+        const btnCheckout = document.getElementById('btn-checkout');
+        if (btnCheckout) btnCheckout.disabled = this.items.length === 0;
+    },
 
-    function calculateTotal() {
-        return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    }
+    save() {
+        localStorage.setItem('user_cart', JSON.stringify(this.items));
+        this.updateTotal();
+        this.render();
+    },
 
-    // --- UI Rendering ---
+    syncRoomSelection() {
+        const savedRoom = localStorage.getItem('selected_room');
+        const roomInput = document.querySelector('[name="room_no"]');
+        if (savedRoom && roomInput) {
+            roomInput.value = savedRoom;
+        }
+    },
 
-    function renderCart() {
-        if (!cartItemsContainer) return;
+    render() {
+        this.renderSidebar();
+        this.renderCheckout();
+    },
 
-        if (cart.length === 0) {
-            const emptyHtml = `
-                <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm w-100">
-                    <i class="bi bi-cart fs-1 d-block mb-3"></i>
-                    Your cart is empty
-                </div>
-            `;
-            cartItemsContainer.innerHTML = emptyHtml;
-            if (cartTotalElement) cartTotalElement.textContent = '$0.00';
-            const cartSubtotalElement = document.getElementById('cart-subtotal');
-            if (cartSubtotalElement) cartSubtotalElement.textContent = '$0.00';
-            if (cartCountBadge) cartCountBadge.textContent = '0';
+    renderSidebar() {
+        const container = document.getElementById('cart-items-container');
+        if (!container) return;
+
+        if (this.items.length === 0) {
+            container.innerHTML = '<div class="text-center py-5 text-muted small"><i class="bi bi-cart3 fs-2 d-block mb-2 opacity-25"></i>Your cart is empty</div>';
             return;
         }
 
-        let html = '';
-        let totalCount = 0;
-
-        // Check if we are on the Cart Page or using the Sidebar
-        const isCartPage = window.location.pathname.includes('cart.php');
-
-        cart.forEach(item => {
-            totalCount += item.quantity;
-            if (isCartPage) {
-                // Large Page Layout (Matches components/cart-item.php but in JS)
-                html += `
-                    <div class="card mb-3 border-0 shadow-sm cart-item-card w-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="cart-item-info">
-                                    <h6 class="fw-bold mb-1">${item.name}</h6>
-                                    <span class="text-muted fw-bold">$${item.price.toFixed(2)}</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-4">
-                                    <div class="quantity-controls d-flex align-items-center bg-light rounded-pill px-2 py-1">
-                                        <button class="btn btn-sm p-0 px-2 btn-decrease border-0" data-id="${item.id}">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <span class="fw-bold mx-2" style="min-width: 20px; text-align: center;">${item.quantity}</span>
-                                        <button class="btn btn-sm p-0 px-2 btn-increase border-0" data-id="${item.id}">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                    <div class="text-end" style="min-width: 80px;">
-                                        <span class="fw-bold text-dark">$${(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                    <button class="btn btn-link text-danger p-0 btn-remove" data-id="${item.id}">
-                                        <i class="bi bi-trash fs-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+        container.innerHTML = this.items.map(item => `
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-light pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="/cafeteria-system-develop/uploads/products/${item.image || 'default.png'}" class="rounded-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='https://placehold.co/40?text=Food'">
+                    <div style="max-width: 100px;">
+                        <div class="fw-bold small text-truncate text-dark">${item.name}</div>
+                        <div class="text-warning fw-bold extra-small">${(item.price * item.quantity).toFixed(2)} EGP</div>
                     </div>
-                `;
-            } else {
-                // Sidebar Layout
-                html += `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <h6 class="fw-bold mb-1">${item.name}</h6>
-                            <span class="text-muted small">$${item.price.toFixed(2)}</span>
-                        </div>
-                        <div class="d-flex flex-column align-items-end gap-2">
-                            <div class="quantity-controls">
-                                <button class="btn btn-sm p-0 px-2 btn-decrease" data-id="${item.id}">-</button>
-                                <span class="fw-bold mx-1">${item.quantity}</span>
-                                <button class="btn btn-sm p-0 px-2 btn-increase" data-id="${item.id}">+</button>
-                            </div>
-                            <button class="btn btn-link text-danger btn-sm p-0 btn-remove" data-id="${item.id}">Remove</button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
+                </div>
+                <div class="d-flex align-items-center gap-1 bg-light rounded-pill px-2 py-1">
+                    <button class="btn btn-sm p-0 m-0 border-0 btn-qty-down" data-id="${item.id}"><i class="bi bi-dash"></i></button>
+                    <span class="small fw-bold mx-1" style="min-width: 15px; text-align: center;">${item.quantity}</span>
+                    <button class="btn btn-sm p-0 m-0 border-0 btn-qty-up" data-id="${item.id}"><i class="bi bi-plus text-warning"></i></button>
+                </div>
+            </div>
+        `).join('');
+    },
 
-        cartItemsContainer.innerHTML = html;
-        const total = calculateTotal().toFixed(2);
-        if (cartTotalElement) cartTotalElement.textContent = `$${total}`;
-        
-        const cartSubtotalElement = document.getElementById('cart-subtotal');
-        if (cartSubtotalElement) cartSubtotalElement.textContent = `$${total}`;
-        
-        if (cartCountBadge) cartCountBadge.textContent = totalCount;
+    renderCheckout() {
+        const container = document.getElementById('checkout-items-list');
+        if (!container) return;
 
-        // Re-attach event listeners for dynamic buttons
-        attachItemEventListeners();
-    }
-
-    function attachItemEventListeners() {
-        document.querySelectorAll('.btn-increase').forEach(btn => {
-            btn.addEventListener('click', () => increaseQuantity(parseInt(btn.dataset.id)));
-        });
-        document.querySelectorAll('.btn-decrease').forEach(btn => {
-            btn.addEventListener('click', () => decreaseQuantity(parseInt(btn.dataset.id)));
-        });
-        document.querySelectorAll('.btn-remove').forEach(btn => {
-            btn.addEventListener('click', () => removeItem(parseInt(btn.dataset.id)));
-        });
-    }
-
-    // --- Sidebar Controls ---
-
-    function openCartSidebar() {
-        cartSidebar.classList.add('active');
-        cartOverlay.classList.add('show');
-    }
-
-    function closeCartSidebar() {
-        cartSidebar.classList.remove('active');
-        cartOverlay.classList.remove('show');
-    }
-
-    // --- Global Event Listeners ---
-
-    // Listen for Add to Cart buttons
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.add-to-cart-btn');
-        if (btn) {
-            const id = parseInt(btn.dataset.id);
-            const name = btn.dataset.name;
-            const price = btn.dataset.price;
-            addToCart(id, name, price);
+        if (this.items.length === 0) {
+            container.innerHTML = '<div class="text-center py-5 text-muted">Your cart is currently empty. <a href="index.php?page=home" class="text-warning fw-bold">Order Now</a></div>';
+            return;
         }
-    });
 
-    if (cartToggle) cartToggle.addEventListener('click', openCartSidebar);
-    if (closeCart) closeCart.addEventListener('click', closeCartSidebar);
-    if (cartOverlay) cartOverlay.addEventListener('click', closeCartSidebar);
+        container.innerHTML = this.items.map(item => `
+            <div class="cart-item d-flex align-items-center justify-content-between py-4 border-bottom px-3 mb-2">
+                <div class="d-flex align-items-center gap-4">
+                    <img src="/cafeteria-system-develop/uploads/products/${item.image || 'default.png'}" class="rounded-4 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://placehold.co/70?text=Food'">
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark">${item.name}</h6>
+                        <p class="text-muted small mb-0">${item.price.toFixed(2)} EGP per unit</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="input-group input-group-sm rounded-pill border py-1 px-2" style="width: 110px; background: #fff;">
+                        <button class="btn btn-sm btn-link text-dark p-0 border-0 btn-qty-down shadow-none" data-id="${item.id}"><i class="bi bi-dash fs-5"></i></button>
+                        <input type="text" class="form-control bg-transparent border-0 text-center fw-bold p-0 shadow-none" value="${item.quantity}" readonly>
+                        <button class="btn btn-sm btn-link text-warning p-0 border-0 btn-qty-up shadow-none" data-id="${item.id}"><i class="bi bi-plus fs-5"></i></button>
+                    </div>
+                    <div class="fw-bold fs-5 text-dark" style="min-width: 100px; text-align: right;">${(item.price * item.quantity).toFixed(2)} EGP</div>
+                    <button class="btn btn-link text-danger p-0 border-0 btn-remove shadow-none" data-id="${item.id}"><i class="bi bi-trash3-fill fs-5"></i></button>
+                </div>
+            </div>
+        `).join('');
+    },
 
-    // Order Submission
-    const orderForm = document.getElementById('order-form');
-    if (orderForm) {
-        orderForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    setupEvents() {
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('button');
+            if (!el) return;
+            const id = parseInt(el.dataset.id);
 
-            if (cart.length === 0) {
-                alert('Your cart is empty!');
-                return;
-            }
-
-            const confirmBtn = orderForm.querySelector('button[type="submit"]');
-            const originalText = confirmBtn.innerHTML;
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
-
-            const orderData = {
-                room: document.getElementById('room').value,
-                notes: document.getElementById('notes').value,
-                total: calculateTotal(),
-                items: cart
-            };
-
-            try {
-                // In a real MVC, this might go to a router. 
-                // For now, we'll assume a direct call or a simple endpoint.
-                // We'll point to a temporary bridge file or assume OrderController handles it.
-                // Since there's no router shown, I'll create a simple endpoint file `endpoints/confirm-order.php` 
-                // but let's try calling a potential route if it exists.
-                // Given the project structure, I'll assume we need an entry point.
-                
-                const response = await fetch('../../index.php?action=confirmOrder', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
+            if (el.classList.contains('btn-add-to-cart')) {
+                this.addToCart({ 
+                    id, 
+                    name: el.dataset.name, 
+                    price: parseFloat(el.dataset.price), 
+                    image: el.dataset.image 
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert('Order confirmed successfully!');
-                    cart = [];
-                    saveCart();
-                    window.location.href = 'my-orders.php';
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error confirming order:', error);
-                alert('Something went wrong. Please try again.');
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = originalText;
+            } else if (el.classList.contains('btn-qty-up')) {
+                this.increaseQuantity(id);
+            } else if (el.classList.contains('btn-qty-down')) {
+                this.decreaseQuantity(id);
+            } else if (el.classList.contains('btn-remove')) {
+                this.removeItem(id);
             }
         });
-    }
 
-    // Initial Render
-    renderCart();
-});
+         const form = document.getElementById('checkout-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (this.items.length === 0) return Swal.fire("Empty Cart", "Please add some items first!", "warning");
+
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing Order...';
+
+                const orderData = {
+                    user_id: window.userId,
+                    room_no: form.querySelector('[name="room_no"]').value,
+                    notes: form.querySelector('[name="notes"]').value,
+                    items: this.items
+                };
+
+                try {
+                    const response = await fetch('index.php?page=confirm-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.items = [];
+                        this.save();
+                        Swal.fire({
+                            title: 'Order Placed!',
+                            text: 'Your order is being prepared.',
+                            icon: 'success',
+                            confirmButtonColor: '#F59E0B'
+                        }).then(() => {
+                            window.location.href = 'index.php?page=orders';
+                        });
+                    } else {
+                        Swal.fire("Order Failed", result.message, "error");
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                } catch (error) {
+                    console.error("Order Error:", error);
+                    Swal.fire("Connection Error", "Could not reach server. Check your internet.", "error");
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            });
+        }
+    },
+
+    showFeedback(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed bottom-0 start-50 translate-middle-x mb-5 bg-dark text-white px-4 py-2 rounded-pill shadow-lg z-3 border border-secondary';
+        toast.style.animation = 'fadeInUp 0.3s ease-out';
+        toast.innerHTML = `<i class="bi bi-check-circle-fill text-warning me-2"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'fadeOutDown 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+};
+
+ const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes fadeOutDown { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 20px); } }
+    .extra-small { font-size: 0.65rem; }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', () => Cart.init());

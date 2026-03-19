@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../models/OrderItem.php';
 
@@ -12,85 +11,145 @@ class OrderController {
         $this->orderItemModel = new OrderItem();
     }
 
-    /**
-     * Confirm a new order
-     * Expects JSON input via POST
-     */
     public function confirmOrder() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
-            return;
-        }
-
-        // Initialize session if not started
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        // Get user ID from session (fallback to dummy for now if not set)
-        $userId = $_SESSION['user_id'] ?? 1; 
-
-        // Get POST data
-        $data = json_decode(file_get_contents('php://input'), true);
-
+        $raw = file_get_contents('php://input');
+        $data = json_decode($raw, true);
+        
         if (!$data) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'No data received']);
-            return;
+            $this->jsonResponse(false, 'Invalid order data received.');
         }
 
-        $room = $data['room'] ?? '';
+        $userId = $_SESSION['user']['id'] ?? ($data['user_id'] ?? null);
+        $roomNo = $data['room_no'] ?? '';
         $notes = $data['notes'] ?? '';
-        $total = $data['total'] ?? 0;
         $items = $data['items'] ?? [];
 
-        if (empty($room) || empty($items)) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Missing required fields']);
-            return;
+        if (!$userId || empty($items)) {
+            $this->jsonResponse(false, 'Required fields are missing.');
         }
 
-        // Start Transaction (using mysqli directly from model's DB connection would be better, 
-        // but since models create their own connections, we'll assume the connection is shared or handled)
-        // For simplicity with the provided db() function, we'll just proceed.
-        
-        $orderId = $this->orderModel->createOrder($userId, $room, $notes, $total);
+        $total_price = 0;
+        foreach ($items as $item) {
+            $total_price += $item['price'] * $item['quantity'];
+        }
 
-        if ($orderId) {
-            foreach ($items as $item) {
-                $this->orderItemModel->addOrderItem(
-                    $orderId, 
-                    $item['id'], 
-                    $item['quantity'], 
-                    $item['price']
-                );
+        $orderId = $this->orderModel->createOrder($userId, $roomNo, $notes, $total_price);
+
+        if ($orderId === false) {
+        }
+
+        if (is_string($orderId) && str_starts_with($orderId, 'ERROR:')) {
+            $this->jsonResponse(false, 'Critical error: ' . $orderId);
+        }
+
+        if (!empty($orderId)) {
+            $added = $this->orderItemModel->addItems($orderId, $items);
+            if ($added === true) {
+                $this->jsonResponse(true, 'Order confirmed successfully!', ['order_id' => $orderId]);
+            } else {
+                $this->jsonResponse(false, 'Order created but failed to add items: ' . (is_string($added) ? $added : ''));
             }
-
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'order_id' => $orderId]);
         } else {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Failed to create order']);
+            $error_str = var_export($orderId, true);
+            $this->jsonResponse(false, 'Critical error: Failed to generate order. ID received was: ' . $error_str);
         }
     }
 
-    /**
-     * Get orders for the current user
-     */
-    public function getUserOrders() {
+    public function myOrders() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        $userId = $_SESSION['user_id'] ?? 1;
-        $orders = $this->orderModel->getOrdersByUser($userId);
-        
-        // Optionally attach items to each order
-        foreach ($orders as &$order) {
-            $order['items'] = $this->orderItemModel->getOrderItems($order['id']);
+        $userId = $_SESSION['user']['id'] ?? null;
+        if (!$userId) {
+            header('Location: index.php?page=login');
+            exit;
         }
 
-        return $orders;
+        $orders = $this->orderModel->getOrdersByUserId($userId);
+        
+        foreach ($orders as &$order) {
+            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
+        }
+        
+        require_once BASE_PATH . '/views/user/my-orders.php';
+    }
+
+    public function adminOrders() {
+        $orders = $this->orderModel->getAllOrders();
+
+        foreach ($orders as &$order) {
+            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
+        }
+
+        require_once BASE_PATH . '/views/admin/orders.php';
+    }
+
+    public function adminUpdateOrderStatus() {
+        $orderId = $_POST['order_id'] ?? null;
+        $status = $_POST['status'] ?? null;
+
+        $allowed = ['processing', 'out_for_delivery', 'delivered', 'canceled'];
+        if (!$orderId || !in_array($status, $allowed, true)) {
+            $_SESSION['error'] = "Invalid order update request.";
+            header("Location: index.php?page=admin-orders");
+            exit;
+        }
+
+        $ok = $this->orderModel->updateOrderStatus($orderId, $status);
+        if ($ok) {
+            $_SESSION['success'] = "Order status updated successfully.";
+        } else {
+            $_SESSION['error'] = "Failed to update order status.";
+        }
+
+        header("Location: index.php?page=admin-orders");
+        exit;
+    }
+
+    public function adminChecks() {
+        $startDate = $_GET['start_date'] ?? null;
+        $endDate = $_GET['end_date'] ?? null;
+
+        if (!empty($startDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
+            $startDate = null;
+        }
+        if (!empty($endDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+            $endDate = null;
+        }
+
+        $orders = $this->orderModel->getOrdersBetweenDates($startDate, $endDate);
+
+        $stats = [
+            'total' => count($orders),
+            'processing' => 0,
+            'out_for_delivery' => 0,
+            'delivered' => 0,
+            'canceled' => 0,
+        ];
+
+        foreach ($orders as &$order) {
+            $orderStatus = $order['status'] ?? '';
+            if (isset($stats[$orderStatus])) $stats[$orderStatus]++;
+
+            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
+        }
+
+        require_once BASE_PATH . '/views/admin/checks.php';
+    }
+
+    private function jsonResponse($success, $message, $data = []) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success, 
+            'message' => $message, 
+            'data'    => $data
+        ]);
+        exit;
     }
 }
+?>
