@@ -224,7 +224,7 @@ const Cart = {
               icon: "success",
               confirmButtonColor: "#F59E0B",
             }).then(() => {
-              window.location.href = "index.php?page=orders";
+              window.location.href = "index.php?page=my-orders";
             });
           } else {
             Swal.fire("Order Failed", result.message, "error");
