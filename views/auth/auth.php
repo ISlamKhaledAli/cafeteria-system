@@ -1,8 +1,5 @@
 <?php
-/**
- * Polished Unified Auth View - Cafeteria System
- * Premium Design with Glassmorphism and Smooth Motion.
- */
+ 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,12 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Access - Cafeteria</title>
-    <!-- Google Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Icon System -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Premium Styles (Inlined for Absolute Stability) -->
-    <style>
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+     <style>
         :root {
             --primary: #F59E0B;
             --hover: #D97706;
@@ -318,13 +312,11 @@
 <body>
 
     <div class="auth-container">
-        <!-- Auth Card Start -->
-        <div class="auth-card <?= isset($_SESSION['show_register']) ? 'register-active' : '' ?>">
+         <div class="auth-card <?= isset($_SESSION['show_register']) ? 'register-active' : '' ?>">
             
             <div class="forms-wrapper">
                 
-                <!-- 1. LOGIN SECTION -->
-                <div class="auth-form login-form">
+                 <div class="auth-form login-form">
                     <div class="header-section text-center">
                         <h2>Welcome</h2>
                         <p>Sign in to your account</p>
@@ -351,6 +343,10 @@
                             <span class="password-toggle"><i class="bi bi-eye"></i></span>
                         </div>
 
+                        <div class="text-end mb-4 px-2">
+                            <a href="index.php?page=forget-password" class="link-switch small opacity-75">Forgot Password?</a>
+                        </div>
+
                         <button type="submit" class="btn-premium">Sign In</button>
                     </form>
 
@@ -359,8 +355,7 @@
                     </div>
                 </div>
 
-                <!-- 2. REGISTER SECTION -->
-                <div class="auth-form register-form">
+                 <div class="auth-form register-form">
                     <div class="header-section text-center">
                         <h2>Join Us</h2>
                         <p>Quick set up for ordering</p>
@@ -393,8 +388,7 @@
                             <span class="password-toggle"><i class="bi bi-eye"></i></span>
                         </div>
 
-                        <!-- Room No Removed as per request -->
-
+ 
                         <div class="premium-upload-holder">
                             <input type="file" name="image" id="profileImage" accept="image/*" class="d-none" style="display:none;">
                             <label for="profileImage" class="premium-upload-btn">
@@ -413,11 +407,9 @@
 
             </div>
         </div>
-        <!-- Auth Card End -->
-    </div>
+     </div>
 
-    <!-- Interactions (Inlined for Absolute Stability) -->
-    <script>
+     <script>
         const PremiumAuth = {
             card: document.querySelector('.auth-card'),
             init() {
@@ -483,8 +475,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             PremiumAuth.init();
             
-            // Simple file name display for the custom upload button
-            document.getElementById('profileImage')?.addEventListener('change', function(e) {
+             document.getElementById('profileImage')?.addEventListener('change', function(e) {
                 const fileName = e.target.files[0]?.name || "Upload Profile Picture (Optional)";
                 document.getElementById('fileNameDisplay').textContent = fileName;
             });

@@ -3,114 +3,130 @@ require_once __DIR__ . '/../../layouts/header.php';
 require_once __DIR__ . '/../../layouts/navbar.php';
 ?>
 
-<div class="container py-5" style="max-width: 800px;">
-    
-    <div class="d-flex justify-content-between align-items-end mb-4">
-        <div>
-            <h2 class="h3 fw-bold text-dark mb-1">Edit User</h2>
-            <p class="text-muted mb-0 small">Update account details for <?= htmlspecialchars($user['name']) ?>.</p>
-        </div>
-        <a href="/PHP/cafeteria-system/admin/users" class="text-decoration-none fw-semibold" style="color: #d97706;">
-            <i class="fas fa-arrow-left me-1"></i> Back to list
+<div class="container-fluid py-4 px-4" style="background-color: #fcfcfc; min-height: 100vh;">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="index.php?page=admin-users" class="btn btn-light shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-arrow-left me-1"></i> Back
         </a>
+        <h2 class="h4 fw-bold mb-0 text-dark">Edit User Account</h2>
     </div>
 
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger shadow-sm border-0" style="border-radius: 8px;">
-            <i class="fas fa-exclamation-circle me-2"></i> <?= $_SESSION['error'] ?>
-        </div>
-    <?php unset($_SESSION['error']); endif; ?>
-
-    <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
-        <div class="card-body p-5">
-            <form action="/PHP/cafeteria-system/admin/edit-user?id=<?= $user['id'] ?>" method="POST" enctype="multipart/form-data">
+    <div class="card border-0 shadow-sm" style="border-radius: 16px; max-width: 800px;">
+        <div class="card-body p-4 p-md-5">
+            <form action="index.php?page=admin-edit-user&id=<?= $user['id'] ?>" method="POST" enctype="multipart/form-data">
                 
-                <div class="text-center mb-5">
+                 <div class="text-center mb-5">
                     <div class="position-relative d-inline-block">
                         <label for="image" style="cursor: pointer;">
-                            <div id="imagePreview" class="rounded-circle d-flex flex-column align-items-center justify-content-center text-muted" style="width: 110px; height: 110px; background-color: #f8f9fa;">
-                                <?php if(!empty($user['image'])): ?>
-                                    <img src="/PHP/cafeteria-system/uploads/users/<?= htmlspecialchars($user['image']) ?>" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
-                                <?php else: ?>
-                                    <img src="/PHP/cafeteria-system/uploads/users/default.png" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
-                                <?php endif; ?>
+                            <?php 
+                                $imageName = !empty($user['image']) ? $user['image'] : 'default.png';
+                                $imageURL = "uploads/users/" . $imageName;
+                                if (!file_exists(BASE_PATH . '/' . $imageURL)) {
+                                    $imageURL = "https://ui-avatars.com/api/?name=" . urlencode($user['name']) . "&background=F59E0B&color=fff&size=120";
+                                } else {
+                                    $imageURL = "/cafeteria-system-develop/uploads/users/" . $imageName;
+                                }
+                            ?>
+                            <div id="imagePreview" class="rounded-circle d-flex flex-column align-items-center justify-content-center border border-2 shadow-sm" 
+                                 style="width: 120px; height: 120px; background-image: url('<?= $imageURL ?>'); background-size: cover; background-position: center; border-color: #d97706 !important;">
                             </div>
-                            <div class="position-absolute rounded-circle d-flex align-items-center justify-content-center border border-2 border-white shadow-sm" style="width: 32px; height: 32px; bottom: 0; right: 0; background-color: #d97706; color: white;">
+                            <div class="position-absolute rounded-circle d-flex align-items-center justify-content-center border border-2 border-white shadow-sm" 
+                                 style="width: 32px; height: 32px; bottom: 5px; right: 5px; background-color: #d97706; color: white;">
                                 <i class="fas fa-camera" style="font-size: 0.8rem;"></i>
                             </div>
                         </label>
-                        <input type="file" id="image" name="image" class="d-none" accept="image/*" onchange="previewImage(event)">
+                        <input type="file" id="image" name="image" class="d-none" accept="image/*">
                     </div>
                     <div class="mt-3">
-                        <h6 class="mb-0 fw-semibold text-dark" style="font-size: 0.9rem;">Update Picture</h6>
+                        <h6 class="mb-0 fw-bold text-dark"><?= htmlspecialchars($user['name']) ?></h6>
+                        <small class="text-muted">Click to change profile picture</small>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label text-dark fw-semibold small">Full Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-id-badge"></i></span>
-                        <input type="text" class="form-control bg-light border-0 py-2" name="name" value="<?= htmlspecialchars($user['name']) ?>" required style="border-radius: 0 8px 8px 0;">
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label text-dark fw-semibold small">Email Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-envelope"></i></span>
-                        <input type="email" class="form-control bg-light border-0 py-2" name="email" value="<?= htmlspecialchars($user['email']) ?>" required style="border-radius: 0 8px 8px 0;">
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label text-dark fw-semibold small">Password <span class="text-danger" style="font-size: 0.75rem;">(Leave blank to keep current)</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control bg-light border-0 py-2" name="password" placeholder="••••••••" style="border-radius: 0 8px 8px 0;">
+                <div class="row g-4">
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Full Name</label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0 py-2" name="name" 
+                                   value="<?= htmlspecialchars($user['name']) ?>" required style="border-radius: 0;">
                         </div>
                     </div>
-                    <div class="col-md-6 mt-4 mt-md-0">
-                        <label class="form-label text-dark fw-semibold small">Role</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-user-shield"></i></span>
-                            <select class="form-select bg-light border-0 py-2" name="role" style="border-radius: 0 8px 8px 0;">
-                                <option value="user" <?= $user['role'] == 'user' ? 'selected' : '' ?>>User</option>
-                                <option value="admin" <?= $user['role'] == 'admin' ? 'selected' : '' ?>>Admin</option>
+
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Email Address</label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+                            <input type="email" class="form-control border-start-0 ps-0 py-2" name="email" 
+                                   value="<?= htmlspecialchars($user['email']) ?>" required style="border-radius: 0;">
+                        </div>
+                    </div>
+
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">New Password <span class="text-danger" style="text-transform: none; font-size: 0.65rem;">(Leave blank to keep current)</span></label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0 py-2" name="password" 
+                                   placeholder="••••••••" style="border-radius: 0;">
+                        </div>
+                    </div>
+
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Role</label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-user-shield text-muted"></i></span>
+                            <select class="form-select border-start-0 ps-0 py-2" name="role" style="border-radius: 0;">
+                                <option value="user" <?= $user['role'] === 'user' ? 'selected' : '' ?>>Standard User</option>
+                                <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Administrator</option>
                             </select>
                         </div>
                     </div>
-                </div>
 
-                <div class="row mb-5">
-                    <div class="col-md-6">
-                        <label class="form-label text-dark fw-semibold small">Room Number</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-door-closed"></i></span>
-                            <input type="text" class="form-control bg-light border-0 py-2" name="room_no" value="<?= htmlspecialchars($user['room_no']) ?>" required style="border-radius: 0 8px 8px 0;">
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Room Number</label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-door-closed text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0 py-2" name="room_no" 
+                                   value="<?= htmlspecialchars($user['room_no']) ?>" required style="border-radius: 0;">
                         </div>
                     </div>
-                    <div class="col-md-6 mt-4 mt-md-0">
-                        <label class="form-label text-dark fw-semibold small">Extension</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-phone-alt"></i></span>
-                            <input type="text" class="form-control bg-light border-0 py-2" name="ext" value="<?= htmlspecialchars($user['ext']) ?>" required style="border-radius: 0 8px 8px 0;">
+
+                     <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Phone</label>
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-phone-alt text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0 py-2" name="ext" 
+                                   value="<?= htmlspecialchars($user['ext']) ?>" required style="border-radius: 0;">
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 pt-3 border-top border-light">
-                    <a href="/PHP/cafeteria-system/admin/users" class="btn btn-light flex-grow-1 py-2 fw-semibold text-dark" style="border-radius: 8px; border: 1px solid #e2e8f0;">Cancel</a>
-                    <button type="submit" class="btn text-white flex-grow-1 py-2 fw-semibold shadow-sm" style="background-color: #d97706; border-radius: 8px;">
+                <div class="d-flex gap-3 mt-5 pt-3 border-top border-light">
+                    <button type="submit" class="btn text-white fw-bold shadow-sm px-5 py-2 flex-grow-1 flex-md-grow-0" 
+                            style="background-color: #d97706; border-radius: 10px;">
                         <i class="fas fa-save me-2"></i> Update Changes
                     </button>
+                    <a href="index.php?page=admin-users" class="btn btn-light fw-semibold shadow-sm px-5 py-2 flex-grow-1 flex-md-grow-0" 
+                       style="border-radius: 10px; border: 1px solid #e5e7eb;">
+                        Cancel
+                    </a>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
 
-<script src="/PHP/cafeteria-system/assets/js/user-form.js"></script>
+<script>
+document.getElementById('image').addEventListener('change', function () {
+    const preview = document.getElementById('imagePreview');
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.style.backgroundImage = `url(${e.target.result})`;
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>

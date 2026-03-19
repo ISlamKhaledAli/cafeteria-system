@@ -1,8 +1,5 @@
 <?php
-/**
- * Auth Controller - Cafeteria System
- * UPDATED: Serves unified animated auth.php view.
- */
+ 
 
 require_once __DIR__ . "/../models/User.php";
 
@@ -12,10 +9,7 @@ class AuthController {
     public function __construct() {
         $this->userModel = new User();
     }
-
-    /**
-     * Handle Login
-     */
+ 
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $email = trim($_POST['email']);
@@ -23,7 +17,20 @@ class AuthController {
 
             $user = $this->userModel->findUserByEmail($email);
 
-            if ($user && password_verify($password, $user['password'])) {
+            $verified = false;
+            if ($user) {
+                 if (!empty($user['password']) && password_verify($password, $user['password'])) {
+                    $verified = true;
+                } else {
+                     if (is_string($user['password']) && hash_equals($user['password'], $password)) {
+                        $verified = true;
+                        $this->userModel->updateUser($user['id'], ['password' => $password]);
+                        $user = $this->userModel->findUserByEmail($email);
+                    }
+                }
+            }
+
+            if ($user && $verified) {
                 $_SESSION['user'] = [
                     'id'    => $user['id'],
                     'name'  => $user['name'],
@@ -33,18 +40,19 @@ class AuthController {
                 ];
                 $_SESSION['user_id'] = $user['id'];
 
-                header("Location: index.php?page=home");
+                if (($user['role'] ?? 'user') === 'admin') {
+                    header("Location: index.php?page=admin-dashboard");
+                } else {
+                    header("Location: index.php?page=home");
+                }
                 exit;
             }
             $_SESSION['error'] = "Authentication failed. Please check your credentials.";
         }
-        // FIXED: Universal auth view
-        require __DIR__ . "/../views/auth/auth.php";
+         require __DIR__ . "/../views/auth/auth.php";
     }
 
-    /**
-     * Handle Registration
-     */
+    
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $email = trim($_POST['email']);
@@ -56,13 +64,11 @@ class AuthController {
                 exit();
             }
 
-            // --- Handle Image Upload (Optional) ---
-            $image_name = 'default.png';
+             $image_name = 'default.png';
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $upload_dir = __DIR__ . "/../uploads/users/";
                 
-                // Ensure directory exists
-                if (!is_dir($upload_dir)) {
+                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }
 
@@ -100,9 +106,7 @@ class AuthController {
         require __DIR__ . "/../views/auth/auth.php";
     }
 
-    /**
-     * Handle Logout
-     */
+   
     public function logout() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();

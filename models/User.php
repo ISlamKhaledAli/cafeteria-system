@@ -79,6 +79,11 @@ class User {
         return $stmt->execute([$id]);
     }
 
+    public function countAdmins() {
+        $stmt = $this->db->query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+        return (int) $stmt->fetchColumn();
+    }
+
     public function findUserByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);

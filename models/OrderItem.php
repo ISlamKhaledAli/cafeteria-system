@@ -8,10 +8,7 @@ class OrderItem {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    /**
-     * Add multiple items to an order.
-     * Table: order_items (id, order_id, product_id, quantity, price)
-     */
+   
     public function addItems($orderId, $items) {
         $query = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($query);
@@ -32,9 +29,7 @@ class OrderItem {
         }
     }
 
-    /**
-     * Retrieve items for a specific order with product details.
-     */
+    
     public function getItemsByOrderId($orderId) {
         $query = "SELECT oi.*, p.name, p.image 
                   FROM order_items oi 

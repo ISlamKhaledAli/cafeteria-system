@@ -1,20 +1,15 @@
 <?php
-/**
- * Product Card Component
- * FIXED: Alignment of price badge, image fallback, and button spacing.
- */
+ 
 ?>
 <div class="col">
     <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative animate-fade-in bg-white" style="transition: transform 0.3s ease;">
-        <!-- Price Badge: Absolute positioned correctly -->
-        <div class="position-absolute top-0 end-0 m-3 z-1">
+         <div class="position-absolute top-0 end-0 m-3 z-1">
             <span class="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 fw-bold" style="border: 1px solid #eee;">
                 $<?= number_format($product['price'], 2) ?>
             </span>
         </div>
         
-        <!-- Image Container -->
-        <div class="bg-light" style="height: 200px; overflow: hidden;">
+         <div class="bg-light" style="height: 200px; overflow: hidden;">
             <?php 
                 $image_path = "uploads/products/" . $product['image'];
                 $display_image = (!empty($product['image']) && file_exists(BASE_PATH . "/" . $image_path)) 

@@ -16,28 +16,30 @@ class UserController {
     public function addUser() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'name'     => $_POST['name'],
-                'email'    => $_POST['email'],
-                'password' => $_POST['password'],
-                'room_no'  => $_POST['room_no'],
-                'ext'      => $_POST['ext'],
-                'role'     => $_POST['role'] ?? 'user'
+                'name'     => $_POST['name']    ?? '',
+                'email'    => $_POST['email']   ?? '',
+                'password' => $_POST['password'] ?? '',
+                'room_no'  => $_POST['room_no'] ?? '',
+                'ext'      => $_POST['ext']     ?? '',
+                'role'     => $_POST['role']    ?? 'user'
             ];
 
-            if ($this->userModel->isEmailExists($_POST['email'])) {
+            if ($this->userModel->isEmailExists($data['email'])) {
                 $_SESSION['error'] = "This email is already registered!";
-                header("Location: /PHP/cafeteria-system/admin/add-user");
+                header("Location: index.php?page=admin-add-user");
                 exit();
             }
 
-            $data['image'] = $this->uploadImage($_FILES['image']);
+            $data['image'] = $this->uploadImage($_FILES['image'] ?? null);
 
             if ($this->userModel->createUser($data)) {
                 $_SESSION['success'] = "User added successfully!";
-                header("Location: /PHP/cafeteria-system/admin/users");
+                header("Location: index.php?page=admin-users");
                 exit();
             } else {
-                echo "Error adding user!";
+                $_SESSION['error'] = "Error adding user!";
+                header("Location: index.php?page=admin-add-user");
+                exit();
             }
         } else {
             require_once __DIR__ . '/../views/admin/add-user.php';
@@ -47,11 +49,11 @@ class UserController {
     public function editUser($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'name'  => $_POST['name'],
-                'email' => $_POST['email'],
-                'room_no' => $_POST['room_no'],
-                'ext'   => $_POST['ext'],
-                'role'  => $_POST['role']
+                'name'    => $_POST['name']    ?? '',
+                'email'   => $_POST['email']   ?? '',
+                'room_no' => $_POST['room_no'] ?? '',
+                'ext'     => $_POST['ext']     ?? '',
+                'role'    => $_POST['role']    ?? 'user'
             ];
 
             if (!empty($_POST['password'])) {
@@ -60,21 +62,33 @@ class UserController {
 
             $oldUser = $this->userModel->getUserById($id);
 
+            // Prevent downgrading the last admin
+            if ($oldUser['role'] === 'admin' && $data['role'] !== 'admin') {
+                if ($this->userModel->countAdmins() <= 1) {
+                    $_SESSION['error'] = "Cannot downgrade the last admin in the system!";
+                    header("Location: index.php?page=admin-edit-user&id=$id");
+                    exit();
+                }
+            }
+
             if (!empty($_FILES['image']['name'])) {
                 $newImage = $this->uploadImage($_FILES['image']);
-                
-                if ($newImage !== 'default.png') {
+                if ($newImage && $newImage !== 'default.png') {
                     $data['image'] = $newImage;
-                    
-                    if ($oldUser['image'] !== 'default.png' && file_exists(__DIR__ . '/../uploads/users/' . $oldUser['image'])) {
-                        unlink(__DIR__ . '/../uploads/users/' . $oldUser['image']);
+                    if (!empty($oldUser['image']) && $oldUser['image'] !== 'default.png') {
+                        $oldPath = __DIR__ . '/../uploads/users/' . $oldUser['image'];
+                        if (file_exists($oldPath)) unlink($oldPath);
                     }
                 }
             }
 
             if ($this->userModel->updateUser($id, $data)) {
                 $_SESSION['success'] = "User updated successfully!";
-                header("Location: /PHP/cafeteria-system/admin/users");
+                header("Location: index.php?page=admin-users");
+                exit();
+            } else {
+                $_SESSION['error'] = "Error updating user!";
+                header("Location: index.php?page=admin-edit-user&id=$id");
                 exit();
             }
         } else {
@@ -86,65 +100,62 @@ class UserController {
     public function deleteUser($id) {
         $user = $this->userModel->getUserById($id);
 
-        if ($user && $user['image'] !== 'default.png') {
-            $imagePath = __DIR__ . '/../uploads/users/' . $user['image'];
-            if (file_exists($imagePath)) {
-                unlink($imagePath);
+        if ($user && $user['role'] === 'admin') {
+            if ($this->userModel->countAdmins() <= 1) {
+                $_SESSION['error'] = "Cannot delete the last admin in the system!";
+                header("Location: index.php?page=admin-users");
+                exit();
             }
+        }
+
+        if ($user && !empty($user['image']) && $user['image'] !== 'default.png') {
+            $imagePath = __DIR__ . '/../uploads/users/' . $user['image'];
+            if (file_exists($imagePath)) unlink($imagePath);
         }
 
         $this->userModel->deleteUser($id);
         $_SESSION['success'] = "User deleted successfully!";
-        header("Location: /PHP/cafeteria-system/admin/users");
+        header("Location: index.php?page=admin-users");
         exit();
     }
 
     private function uploadImage($file) {
-        if (!isset($file['error']) || is_array($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
-            // return 'default.png';
-            die("Debug: الصورة لم تصل للـ Backend بشكل صحيح. تأكد من وجود enctype في الفورم.");
+         if (!isset($file) || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK || empty($file['name'])) {
+            return 'default.png';
         }
 
         if ($file['size'] > 2097152) {
-            // return 'default.png'; 
-            die("Debug: حجم الصورة أكبر من 2 ميجا.");        
+            return 'default.png';  
         }
 
         $allowedTypes = [
-            'jpg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'webp'=> 'image/webp'
+            'jpg'  => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp'
         ];
-        
+
         $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($file['tmp_name']);
-        $ext = array_search($mime, $allowedTypes, true);
+        $mime  = $finfo->file($file['tmp_name']);
+        $ext   = array_search($mime, $allowedTypes, true);
 
         if ($ext === false) {
-            die("Debug: الملف المرفوع ليس صورة مدعومة. الـ MIME المقروء هو: " . $mime);
-            // return 'default.png'; 
+            return 'default.png';  
         }
 
         $targetDir = __DIR__ . '/../uploads/users/';
         if (!is_dir($targetDir)) {
-            // mkdir($targetDir, 0777, true);
-            if (!mkdir($targetDir, 0777, true)) {
-                die("Debug: فشل في إنشاء مجلد uploads/users/. تأكد من صلاحيات Ubuntu.");
-            }
+            mkdir($targetDir, 0777, true);
         }
 
-        $fileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+        $fileName       = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
         $targetFilePath = $targetDir . $fileName;
 
-        if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
+        if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
             return $fileName;
         }
-        else {
-            die("Debug: فشل في نقل الصورة (move_uploaded_file). الأباتشي لا يملك صلاحيات الكتابة في المجلد!");
-        }
 
-        return 'default.png';  
+        return 'default.png';
     }
 }
 ?>

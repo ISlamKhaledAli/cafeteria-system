@@ -12,13 +12,11 @@ const PremiumAuth = {
     },
 
     bindEvents() {
-        // --- Form Switch with Advanced Scaling ---
         document.querySelectorAll('.link-switch').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const isToReg = link.dataset.target === 'register';
                 
-                // Add scale pop for "feel alive" effect
                 this.card.style.transform = 'scale(0.98)';
                 
                 setTimeout(() => {
@@ -32,7 +30,6 @@ const PremiumAuth = {
             });
         });
 
-        // --- Password Toggle Refinement ---
         document.querySelectorAll('.password-toggle').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = btn.parentElement.querySelector('input');
@@ -43,13 +40,11 @@ const PremiumAuth = {
                 icon.classList.toggle('bi-eye');
                 icon.classList.toggle('bi-eye-slash');
                 
-                // Add subtle scale animation to icon
                 icon.style.transform = 'scale(1.2)';
                 setTimeout(() => icon.style.transform = 'scale(1)', 200);
             });
         });
 
-        // --- Input Focus States ---
         document.querySelectorAll('.premium-input').forEach(input => {
             input.addEventListener('focus', () => {
                 input.closest('.input-holder').classList.add('focused');
@@ -59,8 +54,7 @@ const PremiumAuth = {
             });
         });
 
-        // --- Smooth Form Validation & Loading ---
-        document.querySelectorAll('form').forEach(form => {
+         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', (e) => {
                 const btn = form.querySelector('.btn-premium');
                 const inputs = form.querySelectorAll('[required]');

@@ -1,7 +1,5 @@
 <?php
-/**
- * Login View - Premium Cafeteria Auth
- */
+ 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,16 +7,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Cafeteria System</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Custom Auth CSS - FIXED: Relative path with fallback -->
-    <link rel="stylesheet" href="assets/css/auth.css">
+     <link rel="stylesheet" href="assets/css/auth.css">
     <style>
-        /* CRITICAL LAYOUT FALLBACK - Premium Fix */
-        .auth-wrapper { display: flex !important; height: 100vh !important; width: 100% !important; flex-direction: row !important; }
+         .auth-wrapper { display: flex !important; height: 100vh !important; width: 100% !important; flex-direction: row !important; }
         .auth-brand { flex: 1.2; display: flex !important; align-items: center; justify-content: center; background: #111827; color: white; padding: 60px; }
         .auth-form-area { flex: 1; display: flex !important; align-items: center; justify-content: center; background: white; padding: 40px; }
         .brand-content { text-align: center; max-width: 440px; }
@@ -32,8 +26,7 @@
 <body>
 
 <div class="auth-wrapper">
-    <!-- Left Side: Branding -->
-    <div class="auth-brand">
+     <div class="auth-brand">
         <div class="brand-content">
             <div class="brand-logo"><i class="bi bi-cup-hot-fill"></i></div>
             <h1>The Cafeteria</h1>
@@ -41,8 +34,7 @@
         </div>
     </div>
 
-    <!-- Right Side: Login Form -->
-    <div class="auth-form-area">
+     <div class="auth-form-area">
         <div class="auth-box">
             <div class="auth-header">
                 <h2>Welcome Back</h2>

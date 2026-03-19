@@ -9,7 +9,7 @@ function previewImage(event) {
     return;
   }
 
-  const maxSize = 2 * 1024 * 1024; // 2MB
+  const maxSize = 2 * 1024 * 1024; 
   if (file.size > maxSize) {
     alert("Image size must be less than 2MB.");
     event.target.value = "";

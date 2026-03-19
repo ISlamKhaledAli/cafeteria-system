@@ -1,130 +1,149 @@
 <?php
-/**
- * User Home Page - Product Menu
- * FIXED: Dynamic Room Selection from Database and Sorting UI Hook.
- */
-// Fetch dynamic rooms from existing users 
-$user_db = Database::getInstance()->getConnection();
-$room_stmt = $user_db->query("SELECT DISTINCT room_no FROM users WHERE room_no IS NOT NULL AND room_no != ''");
-$dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', '103'];
+ 
+require_once __DIR__ . '/../../layouts/header.php';
+require_once __DIR__ . '/../../layouts/navbar.php';
+require_once BASE_PATH . '/models/Product.php';
 
-// Room Name Mapping for user-friendly labels (Standardized)
-$room_labels = [
-    '101' => 'Meeting Room (101)',
-    '102' => 'Office Room (102)',
-    '103' => 'Conference Hall (103)',
-    'Lobby' => 'Main Lobby'
-];
+$productModel = new Product();
+$products = $productModel->getAllProducts();
+$categories = $productModel->getCategories();
 
-function formatRoomLabel($room, $labels) {
-    if (isset($labels[$room])) return $labels[$room];
-    return is_numeric($room) ? "Room " . $room : $room;
+ $user_db = Database::getInstance()->getConnection();
+try {
+    $room_stmt = $user_db->query("SELECT name FROM rooms ORDER BY name ASC");
+    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
+} catch (PDOException $e) {
+     $room_stmt = $user_db->query("SELECT DISTINCT room_no FROM users WHERE room_no IS NOT NULL AND room_no != '' ORDER BY room_no ASC");
+    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cafeteria - Refreshments Menu</title>
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary-orange: #F59E0B; --bg-gray: #F8F7F6; --text-dark: #111827; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); }
-        .sidebar-card { border-radius: 24px; border: none; position: sticky; top: 100px; max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .form-select, .form-control { border: 1px solid #E5E7EB; transition: border-color 0.2s; }
-        .form-select:focus, .form-control:focus { border-color: var(--primary-orange); box-shadow: none; }
-    </style>
-</head>
-<body>
-    <?php include BASE_PATH . '/layouts/navbar.php'; ?>
+
+<div class="container py-5 px-4" style="background-color: #fcfcfc; min-height: 100vh;">
     <script>window.userId = <?= json_encode($_SESSION['user']['id']) ?>;</script>
 
-    <div class="container py-5">
-        <div class="row g-5">
-            <!-- Sidebar: Order Summary -->
-            <div class="col-lg-4 col-xl-3 order-2 order-lg-1">
-                <div class="card sidebar-card shadow-lg p-4 bg-white">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Order Summary</h4>
-                        <span class="badge rounded-pill bg-light text-warning px-3 py-2 fw-bold" id="cart-count">0 Items</span>
-                    </div>
-
-                    <div id="cart-items-container" class="flex-grow-1 overflow-auto mb-4 pe-2" style="scrollbar-width: thin; min-height: 100px;"></div>
-
-                    <div class="mt-auto pt-3 border-top">
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted text-uppercase">Delivery Room</label>
-                            <!-- FIXED: Dynamic Room selection from DB -->
-                            <select class="form-select border-0 bg-light rounded-3 py-2 shadow-sm" id="room_select">
-                                <?php foreach ($dynamic_rooms as $room): ?>
-                                    <option value="<?= htmlspecialchars($room) ?>">
-                                        <?= htmlspecialchars(formatRoomLabel($room, $room_labels)) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted text-uppercase">Notes</label>
-                            <textarea class="form-control border-0 bg-light rounded-3 shadow-sm" id="order_notes" rows="2" placeholder="e.g. Extra napkins, no sugar..."></textarea>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="text-muted fw-semibold fs-5">Total</span>
-                            <h3 class="fw-bold mb-0 text-warning" id="cart-total">$0.00</h3>
-                        </div>
-
-                        <button class="btn w-100 py-3 rounded-pill fw-bold shadow-lg" onclick="window.location.href='index.php?page=cart'" id="btn-checkout" style="background-color: #F59E0B; color: white;">
-                            Checkout <i class="bi bi-arrow-right ms-2"></i>
-                        </button>
-                    </div>
+     <div class="row align-items-center mb-5 g-4">
+        <div class="col-md-6">
+            <h1 class="fw-bold mb-1 text-dark">Premium <span class="text-warning">Cafeteria</span></h1>
+            <p class="text-muted small mb-0">Discover our fresh menu and enjoy your break.</p>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end gap-3 align-items-center">
+             <div class="bg-white border shadow-sm px-4 py-2 rounded-pill d-flex align-items-center gap-3">
+                <i class="bi bi-geo-alt-fill text-warning"></i>
+                <div>
+                    <div class="extra-small text-muted fw-bold text-uppercase">Delivery Room</div>
+                    <select id="room_select" class="form-select form-select-sm border-0 bg-transparent p-0 shadow-none fw-bold" style="font-size: 0.85rem;" onchange="syncRoom(this.value)">
+                        <?php foreach ($dynamic_rooms as $room): ?>
+                            <option value="<?= htmlspecialchars($room) ?>"><?= htmlspecialchars($room) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
 
-            <!-- Main Content: Product Grid -->
-            <div class="col-lg-8 col-xl-9 order-1 order-lg-2">
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h1 class="fw-bold mb-0">Discover <span class="text-warning">Refreshments</span></h1>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small fw-bold">Sort By:</span>
-                        <!-- FIXED: Sorting Dropdown with JS trigger -->
-                        <select class="form-select border-0 bg-white rounded-pill px-4 shadow-sm" id="sort_products" style="width: 180px;">
-                            <option value="default">Default</option>
-                            <option value="price_low">Price: Low to High</option>
-                            <option value="price_high">Price: High to Low</option>
-                            <option value="name">A - Z</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="product-grid" id="product-grid">
-                    <?php
-                    // Fetch real products from database using Model
-                    require_once BASE_PATH . '/models/Product.php';
-                    $productModel = new Product();
-                    $products = $productModel->getAllProducts();
-
-                    foreach ($products as $p) {
-                        // Map internal schema to component variable names
-                        $product = ['id' => $p['id'], 'name' => $p['product_name'], 'price' => $p['price'], 'image' => $p['image'], 'description' => $p['category_name']];
-                        include BASE_PATH . '/components/product-card.php';
-                    }
-                    ?>
-                </div>
+            <div class="position-relative d-none d-lg-block">
+                <i class="fas fa-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+                <input type="text" id="menuSearch" class="form-control ps-5 bg-white border-0 shadow-sm" 
+                       placeholder="Search snacks..." style="border-radius: 30px; width: 220px;">
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/cart.js"></script>
-</body>
-</html>
+     <div class="d-flex overflow-auto gap-2 mb-5 pb-2 category-scroll" style="scrollbar-width: thin;">
+        <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm category-filter active" data-category="all">All Items</button>
+        <?php foreach ($categories as $cat): ?>
+            <button class="btn btn-white bg-white border rounded-pill px-4 fw-semibold shadow-sm category-filter" 
+                    data-category="<?= htmlspecialchars($cat['name']) ?>">
+                <?= htmlspecialchars($cat['name']) ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+
+     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="product-grid">
+        <?php foreach ($products as $p): 
+            $img = !empty($p['image']) ? $p['image'] : 'default.png';
+            $imgURL = "/cafeteria-system-develop/uploads/products/" . $img;
+            $catName = htmlspecialchars($p['category_name'] ?? 'Beverage');
+        ?>
+            <div class="col product-item" data-category="<?= $catName ?>">
+                <div class="card h-100 border-0 shadow-sm transition-hover" style="border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+                    <div class="position-relative">
+                        <img src="<?= $imgURL ?>" class="card-img-top" alt="<?= htmlspecialchars($p['product_name']) ?>" 
+                             style="height: 160px; object-fit: cover;" onerror="this.src='https://placehold.co/400x300?text=Product'">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-white text-warning shadow-sm rounded-pill px-3 py-2 fw-bold" style="font-size: 0.8rem;">
+                                <?= number_format($p['price'], 2) ?> <small>EGP</small>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3 text-center">
+                        <div class="extra-small text-muted fw-bold text-uppercase mb-1"><?= $catName ?></div>
+                        <h6 class="card-title fw-bold text-dark mb-3"><?= htmlspecialchars($p['product_name']) ?></h6>
+                        
+                        <button class="btn btn-light w-100 rounded-pill fw-bold text-warning border border-warning hover-yellow btn-add-to-cart transition-all" 
+                                data-id="<?= $p['id'] ?>" 
+                                data-name="<?= htmlspecialchars($p['product_name']) ?>" 
+                                data-price="<?= $p['price'] ?>" 
+                                data-image="<?= $img ?>">
+                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<style>
+    .transition-hover { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease; }
+    .transition-hover:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important; }
+    .hover-yellow:hover { background-color: #F59E0B !important; color: white !important; }
+    .category-scroll::-webkit-scrollbar { height: 4px; }
+    .category-scroll::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+    .extra-small { font-size: 0.65rem; }
+    .category-filter.active { background-color: #F59E0B !important; border-color: #F59E0B !important; color: white !important; }
+</style>
+
+<script src="assets/js/cart.js"></script>
+<script>
+ document.querySelectorAll('.category-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active', 'btn-warning'));
+        document.querySelectorAll('.category-filter').forEach(b => b.classList.add('btn-white'));
+        
+        this.classList.add('active', 'btn-warning');
+        this.classList.remove('btn-white');
+
+        const cat = this.dataset.category;
+        document.querySelectorAll('.product-item').forEach(item => {
+            if (cat === 'all' || item.dataset.category === cat) {
+                item.style.display = '';
+                item.classList.add('animate-fade-in');
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+
+ document.getElementById('menuSearch')?.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+});
+
+ function syncRoom(val) {
+    localStorage.setItem('selected_room', val);
+}
+
+ document.addEventListener('DOMContentLoaded', () => {
+    const savedRoom = localStorage.getItem('selected_room');
+    if (savedRoom) {
+        const select = document.getElementById('room_select');
+        if (select) select.value = savedRoom;
+    } else {
+        localStorage.setItem('selected_room', document.getElementById('room_select').value);
+    }
+});
+</script>
+
+<?php require_once __DIR__ . '/../../layouts/footer.php'; ?>
