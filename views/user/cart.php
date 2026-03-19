@@ -1,139 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart - Cafeteria System</title>
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-orange: #F59E0B;
-            --bg-light-gray: #F3F4F6;
-        }
+<?php
+ 
+require_once __DIR__ . '/../../layouts/header.php';
+require_once __DIR__ . '/../../layouts/navbar.php';
+?>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light-gray);
-            color: #1F2937;
-        }
+<div class="container py-5 px-4" style="background-color: #fcfcfc; min-height: 100vh;">
+    <script>window.userId = <?= json_encode($_SESSION['user']['id']) ?>;</script>
 
-        .btn-confirm {
-            background-color: var(--primary-orange);
-            border-color: var(--primary-orange);
-            color: white;
-            font-weight: 600;
-        }
-
-        .btn-confirm:hover {
-            background-color: #D97706;
-            border-color: #D97706;
-            color: white;
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: #111827;
-            border-left: 5px solid var(--primary-orange);
-            padding-left: 1rem;
-        }
-
-        .summary-card {
-            border-radius: 16px;
-            position: sticky;
-            top: 2rem;
-        }
-
-        .form-select, .form-control {
-            border-radius: 10px;
-            border: 1px solid #E5E7EB;
-            padding: 0.75rem;
-        }
-
-        .form-select:focus, .form-control:focus {
-            border-color: var(--primary-orange);
-            box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.1);
-        }
-    </style>
-</head>
-<body>
-
-<div class="container py-5">
-    <!-- Back to Home -->
-    <div class="mb-4">
-        <a href="home.php" class="text-decoration-none text-muted">
-            <i class="bi bi-arrow-left me-1"></i> Back to Menu
+    <div class="mb-5 d-flex align-items-center gap-3">
+        <a href="index.php?page=home" class="btn btn-white bg-white border rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+            <i class="bi bi-arrow-left text-dark fs-5"></i>
         </a>
+        <h2 class="fw-bold mb-0">Confirm Your <span class="text-warning">Order</span></h2>
     </div>
 
-    <div class="row g-4">
-        <!-- Left Panel: Cart Items -->
-        <div class="col-lg-8">
-            <h2 class="section-title mb-4">Your Cart</h2>
-            <div id="cart-items">
-                <!-- Items will be injected here by cart.js -->
-                <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm">
-                    <i class="bi bi-cart fs-1 d-block mb-3"></i>
-                    Your cart is empty
+    <div class="row g-5">
+         <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 28px; background: #fff;">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-4">
+                    <h5 class="fw-bold mb-0">Order Summary</h5>
+                    <button class="btn btn-sm btn-light text-danger fw-bold rounded-pill px-4 border" onclick="Swal.fire({title:'Clear Cart?', icon:'warning', showCancelButton:true}).then(r=>{if(r.isConfirmed){localStorage.removeItem('user_cart'); location.reload();}})">
+                        <i class="bi bi-trash3 me-1"></i> Clear All
+                    </button>
+                </div>
+
+                <div id="checkout-items-list" class="pe-2">
+                     <div class="text-center py-5">
+                        <div class="spinner-border text-warning" role="status"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Panel: Order Summary -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 summary-card">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold mb-4 text-center">Order Summary</h4>
-                    
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold" id="cart-subtotal">$0.00</span>
-                    </div>
-                    <!-- Delivery could be added here if needed -->
-                    <hr class="my-4">
-                    <div class="d-flex justify-content-between mb-4">
-                        <h5 class="fw-bold mb-0">Total</h5>
-                        <h4 class="fw-bold mb-0 text-primary" id="cart-total" style="color: var(--primary-orange) !important;">$0.00</h4>
-                    </div>
+         <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 sticky-top" style="border-radius: 28px; top: 100px; background: #fff;">
+                <form id="checkout-form">
+                    <h5 class="fw-bold mb-4">Complete Details</h5>
 
-                    <form id="order-form">
-                        <div class="mb-3">
-                            <label for="room" class="form-label fw-bold">Delivery Room</label>
-                            <select class="form-select" id="room" required>
-                                <option value="" selected disabled>Select a room</option>
-                                <option value="1">Room 1</option>
-                                <option value="2">Room 2</option>
-                                <option value="3">Room 3</option>
-                                <option value="4">Room 4</option>
-                                <option value="5">Room 5</option>
+                     <div class="mb-4">
+                        <label class="form-label extra-small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Delivery Room</label>
+                        <div class="input-group shadow-sm bg-light" style="border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
+                            <span class="input-group-text bg-transparent border-0"><i class="bi bi-geo-alt-fill text-warning"></i></span>
+                            <select name="room_no" class="form-select border-0 bg-transparent py-2 fw-bold" id="room_select" required>
+                                <?php 
+                                $user_db = Database::getInstance()->getConnection();
+                                try {
+                                    $room_stmt = $user_db->query("SELECT name FROM rooms ORDER BY name ASC");
+                                    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
+                                } catch (PDOException $e) {
+                                    $room_stmt = $user_db->query("SELECT DISTINCT room_no FROM users WHERE room_no IS NOT NULL AND room_no != '' ORDER BY room_no ASC");
+                                    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
+                                }
+                                foreach ($dynamic_rooms as $room): 
+                                ?>
+                                    <option value="<?= htmlspecialchars($room) ?>"><?= htmlspecialchars($room) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="notes" class="form-label fw-bold">Notes</label>
-                            <textarea class="form-control" id="notes" rows="3" placeholder="Any special requests?"></textarea>
-                        </div>
+                     <div class="mb-5">
+                        <label class="form-label extra-small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Special Instructions</label>
+                        <textarea name="notes" class="form-control border-0 bg-light shadow-sm p-3" id="notes" rows="3" placeholder="No sugar, extra ice..." style="border-radius: 12px; font-size: 0.9rem;"></textarea>
+                    </div>
 
-                        <button type="submit" class="btn btn-confirm w-100 py-3 rounded-pill">
-                            Confirm Order
-                        </button>
-                    </form>
-                </div>
+                     <div class="d-flex justify-content-between mb-2 text-muted fw-semibold extra-small">
+                        <span>Total Items Price</span>
+                        <span id="cart-total">0.00 EGP</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <h4 class="fw-bold text-dark">Grand Total</h4>
+                        <h4 class="fw-bold text-warning" id="cart-total">0.00 EGP</h4>
+                    </div>
+
+                    <button type="submit" id="btn-checkout" class="btn btn-warning w-100 py-3 rounded-pill fw-bold shadow-sm transition-all text-dark">
+                        Confirm & Place Order <i class="bi bi-check2-all ms-2"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../../assets/js/cart.js"></script>
-<script>
-    // Note: The cart.js script already has a renderCart function.
-    // However, the cart.js logic is currently hardcoded for the sidebar IDs.
-    // We might need to adjust cart.js or provide a page-specific render.
-</script>
-</body>
-</html>
+<style>
+    .extra-small { font-size: 0.65rem; }
+    .transition-all { transition: all 0.3s ease; }
+    .btn-warning:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2) !important; filter: brightness(1.05); }
+</style>
+
+<script src="assets/js/cart.js"></script>
+
+<?php require_once __DIR__ . '/../../layouts/footer.php'; ?>

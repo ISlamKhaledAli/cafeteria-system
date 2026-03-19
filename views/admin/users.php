@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 require_once __DIR__ . '/../../layouts/header.php';
 require_once __DIR__ . '/../../layouts/navbar.php';
 ?>
@@ -13,9 +10,10 @@ require_once __DIR__ . '/../../layouts/navbar.php';
         <div class="d-flex gap-3 align-items-center">
             <div class="position-relative">
                 <i class="fas fa-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
-                <input type="text" id="searchInput" class="form-control ps-5 bg-white border" placeholder="Search users..." style="border-radius: 8px; border-color: #eaeaea !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <input type="text" id="userSearch" class="form-control ps-5 bg-white border" placeholder="Search users..." 
+                       style="border-radius: 8px; border-color: #eaeaea !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
             </div>
-            <a href="/PHP/cafeteria-system/admin/add-user" class="btn text-white fw-semibold shadow-sm" style="background-color: #d97706; border-radius: 8px; padding: 8px 20px;">
+            <a href="index.php?page=admin-add-user" class="btn text-white fw-semibold shadow-sm" style="background-color: #d97706; border-radius: 8px; padding: 8px 20px;">
                 <i class="fas fa-user-plus me-2"></i> Add User
             </a>
         </div>
@@ -28,9 +26,10 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                     <thead style="background-color: #fafafa;">
                         <tr class="text-muted" style="font-size: 0.75rem; letter-spacing: 0.8px; text-transform: uppercase;">
                             <th class="ps-4 fw-bold border-bottom py-3">Profile</th>
-                            <th class="fw-bold border-bottom py-3">Name</th>
-                            <th class="fw-bold border-bottom py-3">Room Number</th>
-                            <th class="fw-bold border-bottom py-3">Extension</th>
+                            <th class="fw-bold border-bottom py-3">Name & Email</th>
+                            <th class="fw-bold border-bottom py-3">Room</th>
+                            <th class="fw-bold border-bottom py-3">Phone</th>
+                            <th class="fw-bold border-bottom py-3">Role</th>
                             <th class="text-end pe-4 fw-bold border-bottom py-3">Actions</th>
                         </tr>
                     </thead>
@@ -39,43 +38,62 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                             <?php foreach ($users as $user): ?>
                                 <tr>
                                     <td class="ps-4 py-3">
-                                        <?php $imagePath = !empty($user['image']) ? $user['image'] : 'default.png'; ?>
-                                        <img src="/PHP/cafeteria-system/uploads/users/<?= htmlspecialchars($imagePath) ?>" 
-                                             alt="Profile" 
-                                             class="rounded-circle object-fit-cover border" 
-                                             style="width: 45px; height: 45px; border-color: #eee !important;">
+                                        <?php 
+                                            $imageName = !empty($user['image']) ? $user['image'] : 'default.png';
+                                            $imageURL = "uploads/users/" . $imageName;
+                                            if (!file_exists(BASE_PATH . '/' . $imageURL)) {
+                                                $imageURL = "https://ui-avatars.com/api/?name=" . urlencode($user['name']) . "&background=F59E0B&color=fff";
+                                            } else {
+                                                $imageURL = "/cafeteria-system-develop/uploads/users/" . $imageName;
+                                            }
+                                        ?>
+                                        <img src="<?= $imageURL ?>" 
+                                             alt="<?= htmlspecialchars($user['name']) ?>" 
+                                             class="rounded-circle shadow-sm border" 
+                                             style="width: 45px; height: 45px; object-fit: cover; border-color: #eee !important;">
                                     </td>
                                     
-                                    <td class="fw-bold text-dark" style="font-size: 0.95rem;">
-                                        <?= htmlspecialchars($user['name']) ?>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($user['name']) ?></div>
+                                        <div class="text-muted" style="font-size: 0.8rem;"><?= htmlspecialchars($user['email']) ?></div>
                                     </td>
                                     
                                     <td>
                                         <span class="badge text-secondary border px-3 py-2 rounded-pill" style="background-color: #f3f4f6; font-weight: 500;">
-                                            Room <?= htmlspecialchars($user['room']) ?>
+                                            Room <?= htmlspecialchars($user['room_no']) ?>
                                         </span>
                                     </td>
                                     
-                                    <td class="text-muted" style="font-size: 0.95rem;">
+                                    <td class="text-muted fw-semibold" style="font-size: 0.9rem;">
                                         <?= htmlspecialchars($user['ext']) ?>
                                     </td>
-                                    
+
+                                    <td>
+                                        <span class="badge rounded-pill px-3 py-1 fw-bold text-uppercase" 
+                                              style="font-size: 0.65rem; background-color: <?= ($user['role'] === 'admin' ? '#FEF3C7' : '#E0F2FE') ?>; 
+                                                     color: <?= ($user['role'] === 'admin' ? '#B45309' : '#0369A1') ?>;">
+                                            <?= htmlspecialchars($user['role']) ?>
+                                        </span>
+                                    </td>
                                     
                                     <td class="text-end pe-4">
-                                        <a href="/PHP/cafeteria-system/admin/edit-user?id=<?= $user['id'] ?>" class="text-secondary me-3 text-decoration-none">
-                                            <i class="fas fa-pen text-muted hover-warning transition"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" class="text-secondary text-decoration-none" onclick="confirmDelete(<?= $user['id'] ?>)">
-                                            <i class="fas fa-trash text-muted hover-danger transition"></i>
-                                        </a>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="index.php?page=admin-edit-user&id=<?= $user['id'] ?>" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                <i class="fas fa-pen text-muted" style="font-size: 0.8rem;"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                                               style="width: 32px; height: 32px;" onclick="handleDelete(<?= $user['id'] ?>)">
+                                                <i class="fas fa-trash text-danger" style="font-size: 0.8rem;"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="fas fa-users fs-1 mb-3 opacity-25"></i>
-                                    <p>No users found. Start by adding a new user.</p>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-users-slash fs-1 mb-3 opacity-25"></i>
+                                    <p class="mb-0">No users found. Start by adding a new one.</p>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -84,36 +102,39 @@ require_once __DIR__ . '/../../layouts/navbar.php';
             </div>
         </div>
         
-        <div class="card-footer bg-white border-top py-3 px-4 d-flex justify-content-between align-items-center">
-            <span class="text-muted small">Showing 1 to <?= count($users) ?> users</span>
-            <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0 gap-1">
-                    <li class="page-item disabled"><a class="page-link border rounded text-secondary" href="#">Previous</a></li>
-                    <li class="page-item active"><a class="page-link border-0 rounded text-white" style="background-color: #d97706;" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link border rounded text-dark" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link border rounded text-dark" href="#">Next</a></li>
-                </ul>
-            </nav>
+        <div class="card-footer bg-white border-top py-3 px-4">
+            <span class="text-muted small">Showing <?= count($users) ?> registered accounts</span>
         </div>
     </div>
 </div>
-<script src="/PHP/cafeteria-system/assets/js/users-table.js"></script>
+
 <script>
-function confirmDelete(userId) {
+ document.getElementById('userSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+function handleDelete(userId) {
     Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this user data!",
+        title: 'Delete User?',
+        text: "This action cannot be undone. All orders for this user might be affected.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
         cancelButtonColor: '#9ca3af',
-        confirmButtonText: 'Yes, delete it!',
+        confirmButtonText: 'Yes, Delete',
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = `/PHP/cafeteria-system/admin/delete-user?id=${userId}`;
+            window.location.href = `index.php?page=admin-delete-user&id=${userId}`;
         }
     });
 }
 </script>
+
 <?php require_once __DIR__ . '/../../layouts/footer.php'; ?>

@@ -4,23 +4,10 @@
  */
 
 :root {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    --primary: #F59E0B; /* Orange */
-    --hover: #D97706;
-    --primary-glow: rgba(245, 158, 11, 0.4);
-    --bg-dark: #070B14; /* Extremely Dark Navy */
-=======
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     --primary: #F59E0B; 
     --hover: #D97706;
     --primary-glow: rgba(245, 158, 11, 0.4);
     --bg-dark: #070B14; 
-<<<<<<< HEAD
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     --glass: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.08);
     --text: #F9FAFB;
@@ -43,13 +30,6 @@ body, html {
     overflow: hidden;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Living Background Overlay */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 body::before {
     content: '';
     position: absolute;
@@ -67,13 +47,6 @@ body::before {
     100% { transform: rotate(360deg); }
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Container & Centering */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .auth-container {
     width: 100%;
     max-width: 460px;
@@ -84,13 +57,6 @@ body::before {
     min-height: 100vh;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Glassmorphism Card */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .auth-card {
     width: 100%;
     background: var(--glass);
@@ -110,13 +76,6 @@ body::before {
     box-shadow: 0 40px 60px -15px rgba(0, 0, 0, 0.7);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Content Transitions */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .forms-wrapper {
     display: flex;
     width: 200%;
@@ -135,13 +94,6 @@ body::before {
 .auth-card.register-active .login-form { opacity: 0; transform: scale(0.96); pointer-events: none; }
 .auth-card:not(.register-active) .register-form { opacity: 0; transform: scale(0.96); pointer-events: none; }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Typography */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .header-section h2 {
     font-size: 2.25rem;
     font-weight: 800;
@@ -158,13 +110,6 @@ body::before {
     margin: 8px 0 40px;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Form Styling - Premium Inputs */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .input-holder {
     position: relative;
     margin-bottom: 24px;
@@ -211,13 +156,6 @@ body::before {
     transform: translateY(-50%) scale(1.1);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Floating Labels */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .input-holder label {
     position: absolute;
     left: 54px;
@@ -242,13 +180,6 @@ body::before {
     border-radius: 4px;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Buttons - Premium Gradient */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .btn-premium {
     width: 100%;
     background: linear-gradient(135deg, var(--primary) 0%, var(--hover) 100%);
@@ -274,13 +205,6 @@ body::before {
     transform: scale(0.98);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Switch UI */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .switch-box {
     text-align: center;
     margin-top: 32px;
@@ -301,13 +225,6 @@ body::before {
     text-decoration: underline;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Utilities */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .password-toggle {
     position: absolute;
     right: 20px;
@@ -338,13 +255,6 @@ body::before {
     to { opacity: 1; transform: translateY(0); }
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Responsive Fix */
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
-=======
->>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 @media (max-width: 480px) {
     .auth-card { padding: 40px 24px; }
 }
