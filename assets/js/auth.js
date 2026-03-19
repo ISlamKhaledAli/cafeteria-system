@@ -5,6 +5,7 @@
 
 const PremiumAuth = {
 <<<<<<< HEAD
+<<<<<<< HEAD
   card: document.querySelector(".auth-card"),
 
   init() {
@@ -88,6 +89,8 @@ const PremiumAuth = {
 
 document.addEventListener("DOMContentLoaded", () => PremiumAuth.init());
 =======
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     card: document.querySelector('.auth-card'),
     
     init() {
@@ -164,4 +167,7 @@ document.addEventListener("DOMContentLoaded", () => PremiumAuth.init());
 };
 
 document.addEventListener('DOMContentLoaded', () => PremiumAuth.init());
+<<<<<<< HEAD
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+=======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8

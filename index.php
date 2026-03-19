@@ -15,6 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // ==========================================
 // 1. Require Middleware & Controllers
 // ==========================================
@@ -70,10 +71,37 @@ $orderController = new OrderController();
 $authController = new AuthController();
 $productController = new ProductController();
 
+=======
+// 3. Define Root Path for easy referencing
+define('BASE_PATH', __DIR__);
+
+// 4. Core Requirements
+require_once BASE_PATH . '/config/Database.php';
+require_once BASE_PATH . '/middleware/auth.php';
+require_once BASE_PATH . '/controllers/UserController.php';
+require_once BASE_PATH . '/controllers/AuthController.php';
+require_once BASE_PATH . '/controllers/ProductController.php';
+require_once BASE_PATH . '/controllers/OrderController.php';
+require_once BASE_PATH . '/controllers/ReportController.php';
+require_once BASE_PATH . '/controllers/CategoryController.php';
+require_once BASE_PATH . '/controllers/RoomController.php';
+
+// 5. Simple Routing Logic
+$page = $_GET['page'] ?? 'home'; 
+
+// User Controllers
+$orderController = new OrderController();
+$authController = new AuthController();
+$productController = new ProductController();
+
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 // 6. Route Selection
 switch ($page) {
     // --- Auth Routes ---
     case 'login':
+<<<<<<< HEAD
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+=======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
         $authController->login();
         break;
@@ -88,6 +116,7 @@ switch ($page) {
         break;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // ------------------------------------------
     // Admin: Users Management (Dev 3)
     // ------------------------------------------
@@ -100,16 +129,52 @@ switch ($page) {
         AuthMiddleware::checkAdmin();
         $userController->addUser();
 =======
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     // --- User Ordering Routes (Protected) ---
     case 'home':
         AuthMiddleware::checkUser();
         require_once BASE_PATH . '/views/user/home.php';
+<<<<<<< HEAD
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+=======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
         break;
 
     case 'cart':
         AuthMiddleware::checkUser();
         require_once BASE_PATH . '/views/user/cart.php';
+<<<<<<< HEAD
+        break;
+
+    case 'orders':
+        AuthMiddleware::checkUser();
+        $orderController->myOrders();
+        break;
+
+    case 'confirm-order':
+        AuthMiddleware::checkUser();
+        $orderController->confirmOrder();
+        break;
+
+    // --- Admin Routes ---
+    case 'admin-dashboard':
+        AuthMiddleware::checkAdmin();
+        (new ReportController())->dashboard();
+        break;
+
+    case 'admin-users':
+        AuthMiddleware::checkAdmin();
+        (new UserController())->listUsers();
+        break;
+
+    case 'admin-add-user':
+        AuthMiddleware::checkAdmin();
+        (new UserController())->addUser();
+        break;
+
+    case 'admin-edit-user':
+=======
         break;
 
     case 'orders':
@@ -149,6 +214,18 @@ switch ($page) {
         break;
 
     case 'admin-delete-user':
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+        AuthMiddleware::checkAdmin();
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            header("Location: index.php?page=admin-users");
+            exit;
+        }
+<<<<<<< HEAD
+        (new UserController())->editUser($id);
+        break;
+
+    case 'admin-delete-user':
         AuthMiddleware::checkAdmin();
         $id = $_GET['id'] ?? null;
 <<<<<<< HEAD
@@ -168,6 +245,9 @@ switch ($page) {
             header("Location: index.php?page=admin-users");
             exit;
         }
+        (new UserController())->deleteUser($id);
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+=======
         (new UserController())->deleteUser($id);
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
         break;
@@ -221,6 +301,7 @@ switch ($page) {
         }
         break;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     // ------------------------------------------
     // Admin: Orders & Checks (Dev 5)
@@ -336,5 +417,53 @@ switch ($page) {
         require_once BASE_PATH . '/views/404.php'; // Optional view or inline
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
         break;
+=======
+    case 'admin-checks':
+        AuthMiddleware::checkAdmin();
+        $orderController->adminChecks();
+        break;
+
+    case 'admin-categories':
+        AuthMiddleware::checkAdmin();
+        (new CategoryController())->index();
+        break;
+
+    case 'admin-add-category':
+        AuthMiddleware::checkAdmin();
+        (new CategoryController())->store();
+        break;
+
+    case 'admin-delete-category':
+        AuthMiddleware::checkAdmin();
+        (new CategoryController())->delete();
+        break;
+
+    // --- Rooms Routes ---
+    case 'admin-rooms':
+        AuthMiddleware::checkAdmin();
+        (new RoomController())->index();
+        break;
+
+    case 'admin-add-room':
+        AuthMiddleware::checkAdmin();
+        (new RoomController())->store();
+        break;
+
+    case 'admin-edit-room':
+        AuthMiddleware::checkAdmin();
+        (new RoomController())->update();
+        break;
+
+    case 'admin-delete-room':
+        AuthMiddleware::checkAdmin();
+        (new RoomController())->delete();
+        break;
+
+    // --- Default / 404 ---
+    default:
+        http_response_code(404);
+        require_once BASE_PATH . '/views/404.php'; // Optional view or inline
+        break;
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 }
 ?>

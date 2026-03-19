@@ -8,8 +8,12 @@ $db = Database::getInstance()->getConnection();
 
 try {
 <<<<<<< HEAD
+<<<<<<< HEAD
     // 1. Clear existing data (optional, but good for clean state)
     $db->exec("SET FOREIGN_KEY_CHECKS = 0");
+=======
+     $db->exec("SET FOREIGN_KEY_CHECKS = 0");
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
      $db->exec("SET FOREIGN_KEY_CHECKS = 0");
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
@@ -18,8 +22,12 @@ try {
     $db->exec("SET FOREIGN_KEY_CHECKS = 1");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // 2. Insert Categories
     $categories = ['Coffee', 'Tea', 'Snacks', 'Juice'];
+=======
+     $categories = ['Coffee', 'Tea', 'Snacks', 'Juice'];
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
      $categories = ['Coffee', 'Tea', 'Snacks', 'Juice'];
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
@@ -30,11 +38,17 @@ try {
     echo "Categories seeded successfully.\n";
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // 3. Get Category IDs
     $cat_ids = $db->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_KEY_PAIR);
 
     // 4. Insert Products
     $products = [
+=======
+     $cat_ids = $db->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+     $products = [
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
      $cat_ids = $db->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_KEY_PAIR);
 

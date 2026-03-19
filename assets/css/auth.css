@@ -5,15 +5,21 @@
 
 :root {
 <<<<<<< HEAD
+<<<<<<< HEAD
     --primary: #F59E0B; /* Orange */
     --hover: #D97706;
     --primary-glow: rgba(245, 158, 11, 0.4);
     --bg-dark: #070B14; /* Extremely Dark Navy */
 =======
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     --primary: #F59E0B; 
     --hover: #D97706;
     --primary-glow: rgba(245, 158, 11, 0.4);
     --bg-dark: #070B14; 
+<<<<<<< HEAD
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
+=======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
     --glass: rgba(255, 255, 255, 0.04);
     --glass-border: rgba(255, 255, 255, 0.08);
@@ -38,7 +44,10 @@ body, html {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Living Background Overlay */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 body::before {
@@ -59,7 +68,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Container & Centering */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .auth-container {
@@ -73,7 +85,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Glassmorphism Card */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .auth-card {
@@ -96,7 +111,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Content Transitions */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .forms-wrapper {
@@ -118,7 +136,10 @@ body::before {
 .auth-card:not(.register-active) .register-form { opacity: 0; transform: scale(0.96); pointer-events: none; }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Typography */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .header-section h2 {
@@ -138,7 +159,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Form Styling - Premium Inputs */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .input-holder {
@@ -188,7 +212,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Floating Labels */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .input-holder label {
@@ -216,7 +243,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Buttons - Premium Gradient */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .btn-premium {
@@ -245,7 +275,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Switch UI */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .switch-box {
@@ -269,7 +302,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Utilities */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 .password-toggle {
@@ -303,7 +339,10 @@ body::before {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Responsive Fix */
+=======
+>>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 =======
 >>>>>>> 0289bb93717993938ae4d7f277d25ea1433930e8
 @media (max-width: 480px) {
