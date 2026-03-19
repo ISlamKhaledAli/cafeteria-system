@@ -25,11 +25,10 @@ class ProductController {
 
         if (empty($name) || empty($price) || empty($category_id)) {
             $_SESSION['error'] = "All fields are required!";
-            header("Location: index.php?page=admin-add-product");
-            exit;
+            redirect('index.php?page=admin-add-product');
         }
 
-        $image = $this->uploadImage($_FILES['image'] ?? null);
+        $image = $this->uploadImageSecure($_FILES['image'] ?? null);
 
         $data = [
             'name'        => $name,
@@ -40,20 +39,17 @@ class ProductController {
 
         if ($this->productModel->create($data)) {
             $_SESSION['success'] = "Product added successfully!";
-            header("Location: index.php?page=admin-products");
-            exit;
+            redirect('index.php?page=admin-products');
         } else {
             $_SESSION['error'] = "Database error while adding product!";
-            header("Location: index.php?page=admin-add-product");
-            exit;
+            redirect('index.php?page=admin-add-product');
         }
     }
 
     public function edit() {
         $id = $_GET['id'] ?? null;
         if (!$id) {
-            header("Location: index.php?page=admin-products");
-            exit;
+            redirect('index.php?page=admin-products');
         }
         $product    = $this->productModel->getProductById($id);
         $categories = $this->productModel->getCategories();
@@ -63,8 +59,7 @@ class ProductController {
     public function update() {
         $id = $_POST['product_id'] ?? null;
         if (!$id) {
-            header("Location: index.php?page=admin-products");
-            exit;
+            redirect('index.php?page=admin-products');
         }
 
         $name        = trim($_POST['product_name'] ?? '');
@@ -73,8 +68,7 @@ class ProductController {
 
         if (empty($name) || empty($price) || empty($category_id)) {
             $_SESSION['error'] = "All fields are required!";
-            header("Location: index.php?page=admin-edit-product&id=$id");
-            exit;
+            redirect("index.php?page=admin-edit-product&id=$id");
         }
 
         $data = [
@@ -83,35 +77,65 @@ class ProductController {
             'category_id' => $category_id
         ];
 
+        $oldProduct = $this->productModel->getProductById($id);
+
         if (!empty($_FILES['image']['name'])) {
-            $data['image'] = $this->uploadImage($_FILES['image']);
+            $newImage = $this->uploadImageSecure($_FILES['image']);
+            
+            if ($newImage !== '') {
+                $data['image'] = $newImage;
+                
+                if (!empty($oldProduct['image']) && file_exists(__DIR__ . '/../uploads/products/' . $oldProduct['image'])) {
+                    unlink(__DIR__ . '/../uploads/products/' . $oldProduct['image']);
+                }
+            }
         }
 
         if ($this->productModel->update($id, $data)) {
             $_SESSION['success'] = "Product updated successfully!";
-            header("Location: index.php?page=admin-products");
-            exit;
+            redirect('index.php?page=admin-products');
         } else {
             $_SESSION['error'] = "Error updating product!";
-            header("Location: index.php?page=admin-edit-product&id=$id");
-            exit;
+            redirect("index.php?page=admin-edit-product&id=$id");
         }
     }
 
     public function delete($id) {
+        $product = $this->productModel->getProductById($id);
+        
         if ($this->productModel->delete($id)) {
+            if ($product && !empty($product['image']) && file_exists(__DIR__ . '/../uploads/products/' . $product['image'])) {
+                unlink(__DIR__ . '/../uploads/products/' . $product['image']);
+            }
+            
             $_SESSION['success'] = "Product deleted successfully!";
-            header("Location: index.php?page=admin-products");
-            exit;
         } else {
             $_SESSION['error'] = "Failed to delete product!";
-            header("Location: index.php?page=admin-products");
-            exit;
         }
+        redirect('index.php?page=admin-products');
     }
 
-    private function uploadImage($file) {
-        if (!isset($file) || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK || empty($file['name'])) {
+    private function uploadImageSecure($file) {
+        if (!isset($file['error']) || is_array($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+            return '';
+        }
+
+        if ($file['size'] > 2097152) {
+            return ''; 
+        }
+
+        $allowedTypes = [
+            'jpg'  => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp'
+        ];
+        
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        $ext = array_search($mime, $allowedTypes, true);
+
+        if ($ext === false) {
             return '';
         }
 
@@ -120,21 +144,14 @@ class ProductController {
             mkdir($targetDir, 0777, true);
         }
 
-        $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        if (!in_array($fileExt, $allowed)) {
-            return '';
-        }
-
-        $fileName       = time() . '_' . uniqid() . '.' . $fileExt;
+        $fileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
         $targetFilePath = $targetDir . $fileName;
 
-        if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
+        if (move_uploaded_file($file["tmp_name"], $targetFilePath)) {
             return $fileName;
         }
 
-        return '';
+        return '';  
     }
 }
 ?>

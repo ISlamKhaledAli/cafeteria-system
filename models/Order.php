@@ -8,34 +8,17 @@ class Order {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function createOrder($userId, $roomNo, $notes, $total) {
-        try {
-            $query = "INSERT INTO orders (user_id, room_no, notes, total_price, status, created_at) 
-                      VALUES (:user_id, :room_no, :notes, :total_price, 'processing', NOW())";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute([
-                ':user_id' => $userId,
-                ':room_no' => $roomNo,
-                ':notes' => $notes,
-                ':total_price' => $total
-            ]);
-            return $this->db->lastInsertId();
-        } catch (PDOException $e) {
-            try {
-                $query = "INSERT INTO orders (user_id, room_no, notes, total, status, created_at) 
-                          VALUES (:user_id, :room_no, :notes, :total, 'processing', NOW())";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([
-                    ':user_id' => $userId,
-                    ':room_no' => $roomNo,
-                    ':notes' => $notes,
-                    ':total' => $total
-                ]);
-                return $this->db->lastInsertId();
-            } catch (PDOException $e2) {
-                return "ERROR:" . $e2->getMessage() . " | " . $e->getMessage();
-            }
-        }
+    public function createOrder($userId, $room, $notes, $total) {
+        $query = "INSERT INTO orders (user_id, room_no, notes, total_price, status, created_at) 
+                  VALUES (:user_id, :room_no, :notes, :total_price, 'processing', NOW())";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':room_no' => $room,
+            ':notes' => $notes,
+            ':total_price' => $total
+        ]);
+        return $this->db->lastInsertId();
     }
 
     public function getOrdersByUserId($userId) {

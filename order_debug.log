@@ -1,2 +1,0 @@
-Error order: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`cafeteria`.`orders`, CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
-Error fb: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total' in 'field list'

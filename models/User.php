@@ -45,7 +45,7 @@ class User {
             $data['name'], 
             $data['email'], 
             $hashedPassword, 
-            $data['room_no'], 
+            $data['room_no'],
             $data['ext'], 
             $data['image'], 
             $data['role']

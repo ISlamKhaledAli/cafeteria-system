@@ -41,11 +41,10 @@ class AuthController {
                 $_SESSION['user_id'] = $user['id'];
 
                 if (($user['role'] ?? 'user') === 'admin') {
-                    header("Location: index.php?page=admin-dashboard");
+                    redirect('index.php?page=admin-dashboard');
                 } else {
-                    header("Location: index.php?page=home");
+                    redirect('index.php?page=home');
                 }
-                exit;
             }
             $_SESSION['error'] = "Authentication failed. Please check your credentials.";
         }
@@ -60,8 +59,7 @@ class AuthController {
             if ($this->userModel->isEmailExists($email)) {
                 $_SESSION['error'] = "This email is already registered.";
                 $_SESSION['show_register'] = true;
-                header("Location: index.php?page=register");
-                exit();
+                redirect('index.php?page=register');
             }
 
              $image_name = 'default.png';
@@ -96,14 +94,24 @@ class AuthController {
 
             if ($this->userModel->createUser($data)) {
                 $_SESSION['success'] = "Welcome to the family! Please sign in.";
-                header("Location: index.php?page=login");
-                exit;
+                redirect('index.php?page=login');
             } else {
                 $_SESSION['error'] = "System error during registration.";
                 $_SESSION['show_register'] = true;
             }
         }
         require __DIR__ . "/../views/auth/auth.php";
+    }
+
+    public function forgetPassword() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $email = trim($_POST['email']);
+            
+            $_SESSION['success'] = "If this email is registered, a password reset link has been sent to it.";
+            
+            redirect('index.php?page=forget-password');
+        }
+        require __DIR__ . "/../views/auth/forget-password.php";
     }
 
    
@@ -114,8 +122,7 @@ class AuthController {
         $_SESSION = array();
         session_unset();
         session_destroy();
-        header("Location: index.php?page=login");
-        exit;
+        redirect('index.php?page=login');
     }
 }
 ?>

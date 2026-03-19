@@ -19,27 +19,24 @@ class UserController {
                 'name'     => $_POST['name']    ?? '',
                 'email'    => $_POST['email']   ?? '',
                 'password' => $_POST['password'] ?? '',
-                'room_no'  => $_POST['room_no'] ?? '',
+                'room'  => $_POST['room_no'] ?? '',
                 'ext'      => $_POST['ext']     ?? '',
                 'role'     => $_POST['role']    ?? 'user'
             ];
 
             if ($this->userModel->isEmailExists($data['email'])) {
                 $_SESSION['error'] = "This email is already registered!";
-                header("Location: index.php?page=admin-add-user");
-                exit();
+                redirect('index.php?page=admin-add-user');
             }
 
             $data['image'] = $this->uploadImage($_FILES['image'] ?? null);
 
             if ($this->userModel->createUser($data)) {
                 $_SESSION['success'] = "User added successfully!";
-                header("Location: index.php?page=admin-users");
-                exit();
+                redirect('index.php?page=admin-users');
             } else {
                 $_SESSION['error'] = "Error adding user!";
-                header("Location: index.php?page=admin-add-user");
-                exit();
+                redirect('index.php?page=admin-add-user');
             }
         } else {
             require_once __DIR__ . '/../views/admin/add-user.php';
@@ -51,7 +48,7 @@ class UserController {
             $data = [
                 'name'    => $_POST['name']    ?? '',
                 'email'   => $_POST['email']   ?? '',
-                'room_no' => $_POST['room_no'] ?? '',
+                'room' => $_POST['room_no'] ?? '',
                 'ext'     => $_POST['ext']     ?? '',
                 'role'    => $_POST['role']    ?? 'user'
             ];
@@ -66,8 +63,7 @@ class UserController {
             if ($oldUser['role'] === 'admin' && $data['role'] !== 'admin') {
                 if ($this->userModel->countAdmins() <= 1) {
                     $_SESSION['error'] = "Cannot downgrade the last admin in the system!";
-                    header("Location: index.php?page=admin-edit-user&id=$id");
-                    exit();
+                    redirect("index.php?page=admin-edit-user&id=$id");
                 }
             }
 
@@ -84,12 +80,10 @@ class UserController {
 
             if ($this->userModel->updateUser($id, $data)) {
                 $_SESSION['success'] = "User updated successfully!";
-                header("Location: index.php?page=admin-users");
-                exit();
+                redirect('index.php?page=admin-users');
             } else {
                 $_SESSION['error'] = "Error updating user!";
-                header("Location: index.php?page=admin-edit-user&id=$id");
-                exit();
+                redirect("index.php?page=admin-edit-user&id=$id");
             }
         } else {
             $user = $this->userModel->getUserById($id);
@@ -103,8 +97,7 @@ class UserController {
         if ($user && $user['role'] === 'admin') {
             if ($this->userModel->countAdmins() <= 1) {
                 $_SESSION['error'] = "Cannot delete the last admin in the system!";
-                header("Location: index.php?page=admin-users");
-                exit();
+                redirect('index.php?page=admin-users');
             }
         }
 
@@ -115,8 +108,7 @@ class UserController {
 
         $this->userModel->deleteUser($id);
         $_SESSION['success'] = "User deleted successfully!";
-        header("Location: index.php?page=admin-users");
-        exit();
+        redirect('index.php?page=admin-users');
     }
 
     private function uploadImage($file) {

@@ -1,25 +1,26 @@
 <?php
- 
 require_once __DIR__ . '/../../layouts/header.php';
 require_once __DIR__ . '/../../layouts/navbar.php';
 require_once BASE_PATH . '/models/Product.php';
+require_once BASE_PATH . '/models/Room.php';
 
 $productModel = new Product();
 $products = $productModel->getAllProducts();
 $categories = $productModel->getCategories();
 
- $user_db = Database::getInstance()->getConnection();
-try {
-    $room_stmt = $user_db->query("SELECT name FROM rooms ORDER BY name ASC");
-    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
-} catch (PDOException $e) {
-     $room_stmt = $user_db->query("SELECT DISTINCT room_no FROM users WHERE room_no IS NOT NULL AND room_no != '' ORDER BY room_no ASC");
-    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
+$roomModel = new Room();
+$roomsData = $roomModel->getAllRooms();
+$dynamic_rooms = [];
+foreach ($roomsData as $r) {
+    $dynamic_rooms[] = $r['name'];
+}
+if (empty($dynamic_rooms)) {
+    $dynamic_rooms = ['101', '102', 'Lobby']; 
 }
 ?>
 
 <div class="container py-5 px-4" style="background-color: #fcfcfc; min-height: 100vh;">
-    <script>window.userId = <?= json_encode($_SESSION['user']['id']) ?>;</script>
+    <script>window.userId = <?= json_encode($_SESSION['user']['id'] ?? 0) ?>;</script>
 
      <div class="row align-items-center mb-5 g-4">
         <div class="col-md-6">

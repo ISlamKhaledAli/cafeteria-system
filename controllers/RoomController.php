@@ -30,8 +30,7 @@ class RoomController {
                 $_SESSION['error'] = "Room name cannot be empty.";
             }
         }
-        header('Location: index.php?page=admin-rooms');
-        exit;
+        redirect('index.php?page=admin-rooms');
     }
 
     public function update() {
@@ -49,8 +48,7 @@ class RoomController {
                 $_SESSION['error'] = "Invalid data provided.";
             }
         }
-        header('Location: index.php?page=admin-rooms');
-        exit;
+        redirect('index.php?page=admin-rooms');
     }
 
     public function delete() {
@@ -63,8 +61,7 @@ class RoomController {
                 $_SESSION['error'] = "Invalid room ID.";
             }
         }
-        header('Location: index.php?page=admin-rooms');
-        exit;
+        redirect('index.php?page=admin-rooms');
     }
 }
 ?>

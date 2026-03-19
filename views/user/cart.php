@@ -1,11 +1,21 @@
 <?php
- 
 require_once __DIR__ . '/../../layouts/header.php';
 require_once __DIR__ . '/../../layouts/navbar.php';
+require_once BASE_PATH . '/models/Room.php';
+
+$roomModel = new Room();
+$roomsData = $roomModel->getAllRooms();
+$dynamic_rooms = [];
+foreach ($roomsData as $r) {
+    $dynamic_rooms[] = $r['name'];
+}
+if (empty($dynamic_rooms)) {
+    $dynamic_rooms = ['101', '102', 'Lobby']; 
+}
 ?>
 
 <div class="container py-5 px-4" style="background-color: #fcfcfc; min-height: 100vh;">
-    <script>window.userId = <?= json_encode($_SESSION['user']['id']) ?>;</script>
+    <script>window.userId = <?= json_encode($_SESSION['user']['id'] ?? 0) ?>;</script>
 
     <div class="mb-5 d-flex align-items-center gap-3">
         <a href="index.php?page=home" class="btn btn-white bg-white border rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
@@ -42,17 +52,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                         <div class="input-group shadow-sm bg-light" style="border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
                             <span class="input-group-text bg-transparent border-0"><i class="bi bi-geo-alt-fill text-warning"></i></span>
                             <select name="room_no" class="form-select border-0 bg-transparent py-2 fw-bold" id="room_select" required>
-                                <?php 
-                                $user_db = Database::getInstance()->getConnection();
-                                try {
-                                    $room_stmt = $user_db->query("SELECT name FROM rooms ORDER BY name ASC");
-                                    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
-                                } catch (PDOException $e) {
-                                    $room_stmt = $user_db->query("SELECT DISTINCT room_no FROM users WHERE room_no IS NOT NULL AND room_no != '' ORDER BY room_no ASC");
-                                    $dynamic_rooms = $room_stmt->fetchAll(PDO::FETCH_COLUMN) ?: ['101', '102', 'Lobby'];
-                                }
-                                foreach ($dynamic_rooms as $room): 
-                                ?>
+                                <?php foreach ($dynamic_rooms as $room): ?>
                                     <option value="<?= htmlspecialchars($room) ?>"><?= htmlspecialchars($room) ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -70,7 +70,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                     </div>
                     <div class="d-flex justify-content-between mb-4">
                         <h4 class="fw-bold text-dark">Grand Total</h4>
-                        <h4 class="fw-bold text-warning" id="cart-total">0.00 EGP</h4>
+                        <h4 class="fw-bold text-warning" id="cart-total-grand">0.00 EGP</h4>
                     </div>
 
                     <button type="submit" id="btn-checkout" class="btn btn-warning w-100 py-3 rounded-pill fw-bold shadow-sm transition-all text-dark">

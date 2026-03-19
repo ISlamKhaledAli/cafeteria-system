@@ -21,41 +21,59 @@ class OrderController {
         
         if (!$data) {
             $this->jsonResponse(false, 'Invalid order data received.');
+            return;
         }
 
-        $userId = $_SESSION['user']['id'] ?? ($data['user_id'] ?? null);
-        $roomNo = $data['room_no'] ?? '';
-        $notes = $data['notes'] ?? '';
+        $userId = $_SESSION['user']['id'] ?? null;
+        $roomNo = trim($data['room_no'] ?? '');
+        $notes = trim($data['notes'] ?? '');
         $items = $data['items'] ?? [];
 
-        if (!$userId || empty($items)) {
+        if (!$userId || empty($items) || empty($roomNo)) {
             $this->jsonResponse(false, 'Required fields are missing.');
+            return;
         }
 
+        require_once __DIR__ . '/../models/Product.php';
+        $productModel = new Product();
+        
         $total_price = 0;
+        $verified_items = [];
+
         foreach ($items as $item) {
-            $total_price += $item['price'] * $item['quantity'];
+            $realProduct = $productModel->getProductById($item['id']);
+            
+            if ($realProduct && $realProduct['is_available']) {
+                $realPrice = (float) $realProduct['price'];
+                $quantity = (int) $item['quantity'];
+                
+                if ($quantity > 0) {
+                    $total_price += ($realPrice * $quantity);
+                    $verified_items[] = [
+                        'id' => $item['id'],
+                        'quantity' => $quantity,
+                        'price' => $realPrice
+                    ];
+                }
+            }
+        }
+
+        if (empty($verified_items)) {
+            $this->jsonResponse(false, 'Invalid items in the cart.');
+            return;
         }
 
         $orderId = $this->orderModel->createOrder($userId, $roomNo, $notes, $total_price);
 
-        if ($orderId === false) {
-        }
-
-        if (is_string($orderId) && str_starts_with($orderId, 'ERROR:')) {
-            $this->jsonResponse(false, 'Critical error: ' . $orderId);
-        }
-
-        if (!empty($orderId)) {
-            $added = $this->orderItemModel->addItems($orderId, $items);
+        if ($orderId) {
+            $added = $this->orderItemModel->addItems($orderId, $verified_items);
             if ($added === true) {
                 $this->jsonResponse(true, 'Order confirmed successfully!', ['order_id' => $orderId]);
             } else {
-                $this->jsonResponse(false, 'Order created but failed to add items: ' . (is_string($added) ? $added : ''));
+                $this->jsonResponse(false, 'Order created but failed to add items.');
             }
         } else {
-            $error_str = var_export($orderId, true);
-            $this->jsonResponse(false, 'Critical error: Failed to generate order. ID received was: ' . $error_str);
+            $this->jsonResponse(false, 'Critical error: Failed to generate order.');
         }
     }
 
@@ -66,8 +84,7 @@ class OrderController {
 
         $userId = $_SESSION['user']['id'] ?? null;
         if (!$userId) {
-            header('Location: index.php?page=login');
-            exit;
+            redirect('index.php?page=login');
         }
 
         $orders = $this->orderModel->getOrdersByUserId($userId);
@@ -77,69 +94,6 @@ class OrderController {
         }
         
         require_once BASE_PATH . '/views/user/my-orders.php';
-    }
-
-    public function adminOrders() {
-        $orders = $this->orderModel->getAllOrders();
-
-        foreach ($orders as &$order) {
-            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
-        }
-
-        require_once BASE_PATH . '/views/admin/orders.php';
-    }
-
-    public function adminUpdateOrderStatus() {
-        $orderId = $_POST['order_id'] ?? null;
-        $status = $_POST['status'] ?? null;
-
-        $allowed = ['processing', 'out_for_delivery', 'delivered', 'canceled'];
-        if (!$orderId || !in_array($status, $allowed, true)) {
-            $_SESSION['error'] = "Invalid order update request.";
-            header("Location: index.php?page=admin-orders");
-            exit;
-        }
-
-        $ok = $this->orderModel->updateOrderStatus($orderId, $status);
-        if ($ok) {
-            $_SESSION['success'] = "Order status updated successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to update order status.";
-        }
-
-        header("Location: index.php?page=admin-orders");
-        exit;
-    }
-
-    public function adminChecks() {
-        $startDate = $_GET['start_date'] ?? null;
-        $endDate = $_GET['end_date'] ?? null;
-
-        if (!empty($startDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
-            $startDate = null;
-        }
-        if (!empty($endDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
-            $endDate = null;
-        }
-
-        $orders = $this->orderModel->getOrdersBetweenDates($startDate, $endDate);
-
-        $stats = [
-            'total' => count($orders),
-            'processing' => 0,
-            'out_for_delivery' => 0,
-            'delivered' => 0,
-            'canceled' => 0,
-        ];
-
-        foreach ($orders as &$order) {
-            $orderStatus = $order['status'] ?? '';
-            if (isset($stats[$orderStatus])) $stats[$orderStatus]++;
-
-            $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
-        }
-
-        require_once BASE_PATH . '/views/admin/checks.php';
     }
 
     private function jsonResponse($success, $message, $data = []) {

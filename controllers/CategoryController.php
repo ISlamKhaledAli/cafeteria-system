@@ -1,49 +1,49 @@
 <?php
-require_once __DIR__ . '/../models/Product.php';
+require_once __DIR__ . '/../models/Category.php';
 
 class CategoryController {
-    private $db;
+    private $categoryModel;
 
     public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
+        $this->categoryModel = new Category();
     }
 
     public function index() {
-        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id DESC");
-        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $categories = $this->categoryModel->getAllCategories();
         require_once __DIR__ . '/../views/admin/categories.php';
     }
 
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
+            
             if (!empty($name)) {
-                $stmt = $this->db->prepare("INSERT INTO categories (name) VALUES (:name)");
-                $stmt->execute(['name' => $name]);
-                $_SESSION['success'] = "Category added successfully!";
+                if ($this->categoryModel->createCategory($name)) {
+                    $_SESSION['success'] = "Category added successfully!";
+                } else {
+                    $_SESSION['error'] = "Failed to add category. It might already exist.";
+                }
             } else {
                 $_SESSION['error'] = "Category name is required!";
             }
         }
-        header("Location: index.php?page=admin-categories");
-        exit;
+        redirect('index.php?page=admin-categories');
     }
 
     public function delete() {
         $id = $_GET['id'] ?? null;
         if ($id) {
-             $stmt = $this->db->prepare("SELECT COUNT(*) FROM products WHERE category_id = :id");
-            $stmt->execute(['id' => $id]);
-            if ($stmt->fetchColumn() > 0) {
+            if ($this->categoryModel->countProductsInCategory($id) > 0) {
                 $_SESSION['error'] = "Cannot delete: Products exist in this category!";
             } else {
-                $stmt = $this->db->prepare("DELETE FROM categories WHERE id = :id");
-                $stmt->execute(['id' => $id]);
-                $_SESSION['success'] = "Category deleted successfully!";
+                if ($this->categoryModel->deleteCategory($id)) {
+                    $_SESSION['success'] = "Category deleted successfully!";
+                } else {
+                    $_SESSION['error'] = "Failed to delete category!";
+                }
             }
         }
-        header("Location: index.php?page=admin-categories");
-        exit;
+        redirect('index.php?page=admin-categories');
     }
 }
 ?>
