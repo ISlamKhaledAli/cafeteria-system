@@ -1,7 +1,48 @@
 <?php
- 
 
 require_once __DIR__ . "/../models/User.php";
+require_once __DIR__ . '/../config/Database.php';
+
+require_once __DIR__ . '/../mail/PHPMailer.php';
+require_once __DIR__ . '/../mail/SMTP.php';
+require_once __DIR__ . '/../mail/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+/* 🔥 دالة إرسال الإيميل */
+function sendResetEmail($toEmail, $token) {
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'mostafamohamedsalah25@gmail.com';
+        $mail->Password = 'ogao vowz lypb ovlu'; // حط App Password هنا
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('mostafamohamedsalah25@gmail.com', 'Cafeteria');
+        $mail->addAddress($toEmail);
+
+$link = "http://localhost:8000/index.php?page=reset-password&token=$token";
+        $mail->Subject = "Reset Password";
+        $mail->Body = "
+            <h3>Reset your password</h3>
+            <p>Click the link below:</p>
+            <a href='$link'>$link</a>
+            <p>This link expires in 1 hour</p>
+        ";
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        return false;
+    }
+}
 
 class AuthController {
     private $userModel;
@@ -62,11 +103,11 @@ class AuthController {
                 redirect('index.php?page=register');
             }
 
-             $image_name = 'default.png';
+            $image_name = 'default.png';
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $upload_dir = __DIR__ . "/../uploads/users/";
                 
-                 if (!is_dir($upload_dir)) {
+                if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }
 
@@ -103,16 +144,88 @@ class AuthController {
         require __DIR__ . "/../views/auth/auth.php";
     }
 
+    /* 🔥 التعديل هنا */
     public function forgetPassword() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
             $email = trim($_POST['email']);
-            
+            $user = $this->userModel->findUserByEmail($email);
+
+            if ($user) {
+
+                $token = bin2hex(random_bytes(32));
+                $db = Database::getInstance()->getConnection();
+
+                // حذف القديم
+                $db->prepare("DELETE FROM password_resets WHERE email = ?")
+                   ->execute([$email]);
+
+                // إضافة الجديد
+                $stmt = $db->prepare("
+                    INSERT INTO password_resets (email, token, expires_at)
+                    VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))
+                ");
+                $stmt->execute([$email, $token]);
+
+                // إرسال الإيميل
+                sendResetEmail($email, $token);
+            }
+
             $_SESSION['success'] = "If this email is registered, a password reset link has been sent to it.";
-            
             redirect('index.php?page=forget-password');
         }
+
         require __DIR__ . "/../views/auth/forget-password.php";
     }
+
+    public function resetPassword() {
+
+    $token = $_GET['token'] ?? '';
+    $db = Database::getInstance()->getConnection();
+
+    // تحقق من التوكن
+    $stmt = $db->prepare("
+        SELECT * FROM password_resets 
+        WHERE token = ? AND expires_at > NOW()
+    ");
+    $stmt->execute([$token]);
+    $record = $stmt->fetch();
+
+    if (!$record) {
+        die("❌ Invalid or expired link");
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $password = $_POST['password'] ?? '';
+        $confirm  = $_POST['confirm_password'] ?? '';
+
+        if (strlen($password) < 6) {
+            $_SESSION['error'] = "Password must be at least 6 characters";
+        } elseif ($password !== $confirm) {
+            $_SESSION['error'] = "Passwords do not match";
+        } else {
+
+            $userModel = new User();
+            $user = $userModel->findUserByEmail($record['email']);
+
+            if ($user) {
+                $userModel->updateUser($user['id'], [
+                    'password' => $password
+                ]);
+            }
+
+            // حذف التوكن
+            $db->prepare("DELETE FROM password_resets WHERE email = ?")
+               ->execute([$record['email']]);
+
+            $_SESSION['success'] = "Password updated successfully!";
+            redirect('index.php?page=login');
+        }
+    }
+
+    require __DIR__ . '/../views/auth/reset-password.php';
+}
 
    
     public function logout() {

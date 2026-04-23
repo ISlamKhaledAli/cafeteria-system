@@ -9,8 +9,8 @@ class Database
     {
         $host = getenv('DB_HOST') ?: 'localhost';
         $dbname = getenv('DB_NAME') ?: 'cafeteria';
-        $username = getenv('DB_USER') ?: 'mostafamohamed';
-        $password = getenv('DB_PASS') ?: '123456';
+        $username = getenv('DB_USER') ?: 'root';
+        $password = getenv('DB_PASS') ?: '123';
 
         $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
 

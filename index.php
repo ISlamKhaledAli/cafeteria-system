@@ -20,6 +20,7 @@ $routes = [
     'login'           => ['controller' => 'AuthController', 'action' => 'login'],
     'register'        => ['controller' => 'AuthController', 'action' => 'register'],
     'forget-password' => ['controller' => 'AuthController', 'action' => 'forgetPassword'],
+    'reset-password'  => ['controller' => 'AuthController', 'action' => 'resetPassword'], // 👈 الإضافة هنا
     'logout'          => ['controller' => 'AuthController', 'action' => 'logout'],
 
     'home'            => ['view' => 'user/home.php', 'middleware' => 'user'],
