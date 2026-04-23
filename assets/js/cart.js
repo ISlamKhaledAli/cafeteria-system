@@ -1,17 +1,29 @@
 /**
  * Cart & Menu Logic - Cafeteria System
- * UPDATED: Added Nav Badge support and Room Selection sync.
+ * UPDATED: Multi-User Cart & Room Separation (No Cross-User Contamination)
  */
 
 const Cart = {
-  items: JSON.parse(localStorage.getItem("user_cart")) || [],
+  items: [], // سيتم تحميلها في دالة init بناءً على الـ ID
+
+  // دالة ذكية لتوليد اسم السلة الخاص بكل مستخدم
+  getCartKey() {
+    return "user_cart_" + (window.userId || "guest");
+  },
+
+  // دالة ذكية لتوليد الغرفة الخاصة بكل مستخدم
+  getRoomKey() {
+    return "selected_room_" + (window.userId || "guest");
+  },
 
   init() {
+    // تحميل السلة الخاصة بالمستخدم الحالي فقط
+    this.items = JSON.parse(localStorage.getItem(this.getCartKey())) || [];
     this.updateTotal();
     this.render();
     this.setupEvents();
     this.syncRoomSelection();
-    console.log("Cart System Ready (EGP)");
+    console.log("Cart System Ready for User ID:", window.userId);
   },
 
   addToCart(product) {
@@ -75,13 +87,14 @@ const Cart = {
   },
 
   save() {
-    localStorage.setItem("user_cart", JSON.stringify(this.items));
+    // حفظ السلة بالاسم الجديد
+    localStorage.setItem(this.getCartKey(), JSON.stringify(this.items));
     this.updateTotal();
     this.render();
   },
 
   syncRoomSelection() {
-    const savedRoom = localStorage.getItem("selected_room");
+    const savedRoom = localStorage.getItem(this.getRoomKey());
     const roomInput = document.querySelector('[name="room_no"]');
     if (savedRoom && roomInput) {
       roomInput.value = savedRoom;
@@ -104,11 +117,15 @@ const Cart = {
     }
 
     container.innerHTML = this.items
-      .map(
-        (item) => `
+      .map((item) => {
+        let imgPath = item.image || "default.png";
+        let imgSrc = imgPath.startsWith("http")
+          ? imgPath
+          : `uploads/products/${imgPath}`;
+        return `
             <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-light pb-3">
                 <div class="d-flex align-items-center gap-2">
-                    <img src="/cafeteria-system-develop/uploads/products/${item.image || "default.png"}" class="rounded-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='https://placehold.co/40?text=Food'">
+                  <img src="${imgSrc}" class="rounded-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='https://placehold.co/40?text=Food'">
                     <div style="max-width: 100px;">
                         <div class="fw-bold small text-truncate text-dark">${item.name}</div>
                         <div class="text-warning fw-bold extra-small">${(item.price * item.quantity).toFixed(2)} EGP</div>
@@ -120,8 +137,8 @@ const Cart = {
                     <button class="btn btn-sm p-0 m-0 border-0 btn-qty-up" data-id="${item.id}"><i class="bi bi-plus text-warning"></i></button>
                 </div>
             </div>
-        `,
-      )
+        `;
+      })
       .join("");
   },
 
@@ -136,11 +153,16 @@ const Cart = {
     }
 
     container.innerHTML = this.items
-      .map(
-        (item) => `
+      .map((item) => {
+        let imgPath = item.image || "default.png";
+        let imgSrc = imgPath.startsWith("http")
+          ? imgPath
+          : `uploads/products/${imgPath}`;
+
+        return `
             <div class="cart-item d-flex align-items-center justify-content-between py-4 border-bottom px-3 mb-2">
                 <div class="d-flex align-items-center gap-4">
-                    <img src="/cafeteria-system-develop/uploads/products/${item.image || "default.png"}" class="rounded-4 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://placehold.co/70?text=Food'">
+                    <img src="${imgSrc}" class="rounded-4 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://placehold.co/70?text=Food'">
                     <div>
                         <h6 class="fw-bold mb-1 text-dark">${item.name}</h6>
                         <p class="text-muted small mb-0">${item.price.toFixed(2)} EGP per unit</p>
@@ -156,8 +178,8 @@ const Cart = {
                     <button class="btn btn-link text-danger p-0 border-0 btn-remove shadow-none" data-id="${item.id}"><i class="bi bi-trash3-fill fs-5"></i></button>
                 </div>
             </div>
-        `,
-      )
+        `;
+      })
       .join("");
   },
 

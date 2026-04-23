@@ -63,22 +63,32 @@ class AuthController {
             }
 
              $image_name = 'default.png';
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
                 $upload_dir = __DIR__ . "/../uploads/users/";
                 
                  if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }
 
-                $file_tmp = $_FILES['image']['tmp_name'];
-                $file_ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                $file = $_FILES['image'];
+                $allowed_extensions = ['jpg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp'];
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($file['tmp_name']);
 
-                if (in_array($file_ext, $allowed_extensions)) {
-                    $unique_name = time() . "_" . uniqid() . "." . $file_ext;
-                    if (move_uploaded_file($file_tmp, $upload_dir . $unique_name)) {
+                if($file['size'] > 5242880) {
+                    $_SESSION['error'] = "Image is too large (max 5MB).";
+                    $_SESSION['show_register'] = true;
+                    redirect('index.php?page=register');
+                } elseif (!in_array($mime, $allowed_extensions)) {
+                    $_SESSION['error'] = "Invalid image type. Allowed: JPG, PNG, GIF, WEBP.";
+                    $_SESSION['show_register'] = true;
+                    redirect('index.php?page=register');
+                } else {
+                    $ext = array_search($mime, $allowed_extensions, true);
+                    $unique_name = time() . "_" . bin2hex(random_bytes(8)) . "." . $ext;
+                    if (move_uploaded_file($file['tmp_name'], $upload_dir . $unique_name)) {
                         $image_name = $unique_name;
-                    }
+                    } 
                 }
             }
 

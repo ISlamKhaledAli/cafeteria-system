@@ -105,10 +105,15 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                                                 <?php foreach ($order['items'] as $item): ?>
                                                                     <div class="item-row d-flex justify-content-between align-items-center">
                                                                         <div class="d-flex align-items-center gap-3">
-                                                                            <img src="/PHP/cafeteria-system/uploads/products/<?= htmlspecialchars($item['image'] ?: 'default.png') ?>"
-                                                                                 class="rounded-3 shadow-sm border"
-                                                                                 style="width: 48px; height: 48px; object-fit: cover;"
-                                                                                 onerror="this.src='https://placehold.co/80x80?text=Food'">
+                                                                        
+                                                                            <?php 
+                                                                                $itemImg = !empty($item['image']) ? $item['image'] : 'default.png';
+                                                                                $imgSrc = (strpos($itemImg, 'http') === 0) ? $itemImg : 'uploads/products/' . $itemImg;
+                                                                            ?>
+                                                                            <img src="<?= $imgSrc ?>"
+                                                                                class="rounded-3 shadow-sm border"
+                                                                                style="width: 48px; height: 48px; object-fit: cover;"
+                                                                                onerror="this.src='https://placehold.co/80x80?text=Food'">
                                                                             <div>
                                                                                 <div class="fw-bold text-dark" style="font-size: 0.9rem;"><?= htmlspecialchars($item['name'] ?? '') ?></div>
                                                                                 <div class="text-muted" style="font-size: 0.75rem;">Qty: <?= (int)$item['quantity'] ?> × <?= number_format((float)$item['price'], 2) ?> EGP</div>

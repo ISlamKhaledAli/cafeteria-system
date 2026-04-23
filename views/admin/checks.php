@@ -157,12 +157,14 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                                     <?php foreach ($order['items'] as $item): ?>
                                                         <div class="item-row d-flex justify-content-between align-items-center mb-1">
                                                             <div class="d-flex align-items-center gap-3">
-                                                                <img
-                                                                    src="/cafeteria-system-develop/uploads/products/<?= htmlspecialchars($item['image'] ?: '') ?>"
+                                                                <?php 
+                                                                    $itemImg = !empty($item['image']) ? $item['image'] : 'default.png';
+                                                                    $imgSrc = (strpos($itemImg, 'http') === 0) ? $itemImg : 'uploads/products/' . $itemImg;
+                                                                ?>
+                                                                <img src="<?= $imgSrc ?>"
                                                                     class="rounded shadow-sm"
                                                                     style="width: 40px; height: 40px; object-fit: cover;"
-                                                                    onerror="this.src='https://placehold.co/80x80?text=<?= urlencode($item['name'] ?? 'Product') ?>'"
-                                                                >
+                                                                    onerror="this.src='https://placehold.co/80x80?text=Food'">
                                                                 <div>
                                                                     <div class="fw-bold small"><?= htmlspecialchars($item['name'] ?? '') ?></div>
                                                                 Qty: <?= (int)($item['quantity'] ?? 0) ?> × <?= number_format((float)($item['price'] ?? 0), 2) ?> EGP

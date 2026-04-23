@@ -28,7 +28,13 @@ class ProductController {
             redirect('index.php?page=admin-add-product');
         }
 
-        $image = $this->uploadImageSecure($_FILES['image'] ?? null);
+        $image = '';
+        try {
+            $image = $this->uploadImageSecure($_FILES['image'] ?? null);
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Image Upload Error: " . $e->getMessage();
+            redirect('index.php?page=admin-add-product');
+        }
 
         $data = [
             'name'        => $name,
@@ -79,15 +85,20 @@ class ProductController {
 
         $oldProduct = $this->productModel->getProductById($id);
 
-        if (!empty($_FILES['image']['name'])) {
-            $newImage = $this->uploadImageSecure($_FILES['image']);
-            
-            if ($newImage !== '') {
-                $data['image'] = $newImage;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            try {
+                $newImage = $this->uploadImageSecure($_FILES['image']);
                 
-                if (!empty($oldProduct['image']) && file_exists(__DIR__ . '/../uploads/products/' . $oldProduct['image'])) {
-                    unlink(__DIR__ . '/../uploads/products/' . $oldProduct['image']);
+                if ($newImage !== '') {
+                    $data['image'] = $newImage;
+                    
+                    if (!empty($oldProduct['image']) && strpos($oldProduct['image'], 'http') !== 0 && file_exists(__DIR__ . '/../uploads/products/' . $oldProduct['image'])) {
+                        unlink(__DIR__ . '/../uploads/products/' . $oldProduct['image']);
+                    }
                 }
+            } catch (Exception $e) {
+                $_SESSION['error'] = "Image Upload Error: " . $e->getMessage();
+                redirect("index.php?page=admin-edit-product&id=$id");
             }
         }
 
@@ -102,26 +113,44 @@ class ProductController {
 
     public function delete($id) {
         $product = $this->productModel->getProductById($id);
-        
-        if ($this->productModel->delete($id)) {
-            if ($product && !empty($product['image']) && file_exists(__DIR__ . '/../uploads/products/' . $product['image'])) {
-                unlink(__DIR__ . '/../uploads/products/' . $product['image']);
+
+        try {
+            if ($this->productModel->delete($id)) {
+                if ($product && !empty($product['image']) && strpos($product['image'], 'http') !== 0 && file_exists(__DIR__ . '/../uploads/products/' . $product['image'])) {
+                    unlink(__DIR__ . '/../uploads/products/' . $product['image']);
+                }
+                
+                $_SESSION['success'] = "Product deleted successfully!";
+            } else {
+                $_SESSION['error'] = "Failed to delete product!";
             }
-            
-            $_SESSION['success'] = "Product deleted successfully!";
-        } else {
-            $_SESSION['error'] = "Failed to delete product!";
+        } catch (PDOException $e) {
+            $_SESSION['error'] = "Cannot delete this product! It is included in user orders.";
         }
+        
         redirect('index.php?page=admin-products');
     }
 
     private function uploadImageSecure($file) {
-        if (!isset($file['error']) || is_array($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE || empty($file['name'])) {
             return '';
         }
 
-        if ($file['size'] > 2097152) {
-            return ''; 
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE   => 'File is larger than upload_max_filesize in php.ini.',
+                UPLOAD_ERR_FORM_SIZE  => 'File exceeds MAX_FILE_SIZE in the HTML form.',
+                UPLOAD_ERR_PARTIAL    => 'File was only partially uploaded.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+                UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.'
+            ];
+            $errorMsg = $uploadErrors[$file['error']] ?? 'Unknown upload error.';
+            throw new Exception($errorMsg);
+        }
+
+        if ($file['size'] > 5242880) { // 5MB
+            throw new Exception('File size exceeds 5MB limit.');
         }
 
         $allowedTypes = [
@@ -136,12 +165,14 @@ class ProductController {
         $ext = array_search($mime, $allowedTypes, true);
 
         if ($ext === false) {
-            return '';
+            throw new Exception("Invalid file type. Allowed: JPG, PNG, GIF, WEBP. Detected: $mime");
         }
 
         $targetDir = __DIR__ . '/../uploads/products/';
         if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
+            if(!mkdir($targetDir, 0777, true)){
+                throw new Exception('Failed to create destination folder (uploads/products/). Check permissions.');
+            }
         }
 
         $fileName = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
@@ -151,7 +182,7 @@ class ProductController {
             return $fileName;
         }
 
-        return '';  
+        throw new Exception('Failed to move uploaded file. Check folder permissions (chmod 777).');
     }
 }
 ?>

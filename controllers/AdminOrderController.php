@@ -17,6 +17,7 @@ class AdminOrderController {
         foreach ($orders as &$order) {
             $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
         }
+        unset($order);
 
         require_once BASE_PATH . '/views/admin/orders.php';
     }
@@ -69,6 +70,7 @@ class AdminOrderController {
 
             $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
         }
+        unset($order);
 
         require_once BASE_PATH . '/views/admin/checks.php';
     }

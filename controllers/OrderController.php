@@ -92,6 +92,7 @@ class OrderController {
         foreach ($orders as &$order) {
             $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
         }
+        unset($order);
         
         require_once BASE_PATH . '/views/user/my-orders.php';
     }

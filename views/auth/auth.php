@@ -329,7 +329,7 @@
                         <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
 
-                    <form action="index.php?page=login" method="POST">
+                    <form action="index.php?page=login" method="POST" enctype="multipart/form-data">
                         <div class="input-holder">
                             <i class="bi bi-envelope icon-box"></i>
                             <input type="email" name="email" class="premium-input" placeholder=" " required>

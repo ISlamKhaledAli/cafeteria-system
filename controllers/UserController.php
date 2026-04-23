@@ -19,7 +19,7 @@ class UserController {
                 'name'     => $_POST['name']    ?? '',
                 'email'    => $_POST['email']   ?? '',
                 'password' => $_POST['password'] ?? '',
-                'room'  => $_POST['room_no'] ?? '',
+                'room_no'  => $_POST['room_no'] ?? '',
                 'ext'      => $_POST['ext']     ?? '',
                 'role'     => $_POST['role']    ?? 'user'
             ];
@@ -29,7 +29,13 @@ class UserController {
                 redirect('index.php?page=admin-add-user');
             }
 
-            $data['image'] = $this->uploadImage($_FILES['image'] ?? null);
+            try {
+                $data['image'] = $this->uploadImage($_FILES['image'] ?? null);
+            } catch (Exception $e) {
+                $_SESSION['error'] = "Image Upload Error: " . $e->getMessage();
+                redirect('index.php?page=admin-add-user');
+            }
+            // $data['image'] = $this->uploadImage($_FILES['image'] ?? null);
 
             if ($this->userModel->createUser($data)) {
                 $_SESSION['success'] = "User added successfully!";
@@ -48,7 +54,7 @@ class UserController {
             $data = [
                 'name'    => $_POST['name']    ?? '',
                 'email'   => $_POST['email']   ?? '',
-                'room' => $_POST['room_no'] ?? '',
+                'room_no'  => $_POST['room_no'] ?? '',
                 'ext'     => $_POST['ext']     ?? '',
                 'role'    => $_POST['role']    ?? 'user'
             ];
@@ -67,22 +73,33 @@ class UserController {
                 }
             }
 
-            if (!empty($_FILES['image']['name'])) {
-                $newImage = $this->uploadImage($_FILES['image']);
-                if ($newImage && $newImage !== 'default.png') {
-                    $data['image'] = $newImage;
-                    if (!empty($oldUser['image']) && $oldUser['image'] !== 'default.png') {
-                        $oldPath = __DIR__ . '/../uploads/users/' . $oldUser['image'];
-                        if (file_exists($oldPath)) unlink($oldPath);
+            if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                try {
+                    $newImage = $this->uploadImage($_FILES['image']);
+                    if ($newImage && $newImage !== 'default.png') {
+                        $data['image'] = $newImage;
+                        // حذف الصورة القديمة إذا لم تكن الافتراضية
+                        if (!empty($oldUser['image']) && $oldUser['image'] !== 'default.png') {
+                            $oldPath = __DIR__ . '/../uploads/users/' . $oldUser['image'];
+                            if (file_exists($oldPath)) unlink($oldPath);
+                        }
                     }
+                } catch (Exception $e) {
+                    $_SESSION['error'] = "Image Upload Error: " . $e->getMessage();
+                    redirect("index.php?page=admin-edit-user&id=$id");
                 }
             }
 
-            if ($this->userModel->updateUser($id, $data)) {
-                $_SESSION['success'] = "User updated successfully!";
-                redirect('index.php?page=admin-users');
-            } else {
-                $_SESSION['error'] = "Error updating user!";
+            try {
+                if ($this->userModel->updateUser($id, $data)) {
+                    $_SESSION['success'] = "User updated successfully!";
+                    redirect('index.php?page=admin-users');
+                } else {
+                    $_SESSION['error'] = "No changes were made or error occurred!";
+                    redirect("index.php?page=admin-edit-user&id=$id");
+                }
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Database Error: " . $e->getMessage();
                 redirect("index.php?page=admin-edit-user&id=$id");
             }
         } else {
@@ -101,23 +118,41 @@ class UserController {
             }
         }
 
-        if ($user && !empty($user['image']) && $user['image'] !== 'default.png') {
+        try {
+            $this->userModel->deleteUser($id);
+            if ($user && !empty($user['image']) && $user['image'] !== 'default.png') {
             $imagePath = __DIR__ . '/../uploads/users/' . $user['image'];
             if (file_exists($imagePath)) unlink($imagePath);
-        }
 
-        $this->userModel->deleteUser($id);
-        $_SESSION['success'] = "User deleted successfully!";
+            $_SESSION['success'] = "User deleted successfully!";
+        }
+        } catch (PDOException $e) {
+            $_SESSION['error'] = "Cannot delete this user because they have existing orders!";
+        }
+;
         redirect('index.php?page=admin-users');
     }
 
     private function uploadImage($file) {
-         if (!isset($file) || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK || empty($file['name'])) {
+         
+        if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE || empty($file['name'])) {
             return 'default.png';
         }
 
-        if ($file['size'] > 2097152) {
-            return 'default.png';  
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE   => 'File is larger than upload_max_filesize in php.ini.',
+                UPLOAD_ERR_FORM_SIZE  => 'File exceeds MAX_FILE_SIZE in the HTML form.',
+                UPLOAD_ERR_PARTIAL    => 'File was only partially uploaded.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+                UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.'
+            ];
+            $errorMsg = $uploadErrors[$file['error']] ?? 'Unknown upload error.';
+            throw new Exception($errorMsg);
+        }
+        if ($file['size'] > 5242880) {
+            throw new Exception("File size exceeds the 5MB limit.");
         }
 
         $allowedTypes = [
@@ -132,12 +167,15 @@ class UserController {
         $ext   = array_search($mime, $allowedTypes, true);
 
         if ($ext === false) {
-            return 'default.png';  
+            throw new Exception("Invalid file type. Allowed: JPG, PNG, GIF, WEBP. Detected: $mime");
         }
 
         $targetDir = __DIR__ . '/../uploads/users/';
+
         if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
+            if (!mkdir($targetDir, 0777, true)) {
+                 throw new Exception('Failed to create destination folder (uploads/users/). Check permissions.');
+            }
         }
 
         $fileName       = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
@@ -147,7 +185,7 @@ class UserController {
             return $fileName;
         }
 
-        return 'default.png';
+        throw new Exception('Failed to move uploaded file. Check folder permissions (chmod 777).');
     }
 }
 ?>

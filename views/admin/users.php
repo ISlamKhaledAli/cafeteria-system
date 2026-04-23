@@ -44,7 +44,7 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                             if (!file_exists(BASE_PATH . '/' . $imageURL)) {
                                                 $imageURL = "https://ui-avatars.com/api/?name=" . urlencode($user['name']) . "&background=F59E0B&color=fff";
                                             } else {
-                                                $imageURL = "/cafeteria-system-develop/uploads/users/" . $imageName;
+                                                $imageURL = "uploads/users/" . $imageName;
                                             }
                                         ?>
                                         <img src="<?= $imageURL ?>" 

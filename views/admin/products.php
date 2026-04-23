@@ -39,18 +39,15 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                             <?php foreach ($products as $product): ?>
                                 <tr>
                                     <td class="ps-4 py-3">
-                                        <?php if (!empty($product['image'])): ?>
-                                            <img src="/cafeteria-system-develop/uploads/products/<?= htmlspecialchars($product['image']) ?>"
-                                                 alt="<?= htmlspecialchars($product['product_name']) ?>"
-                                                 class="rounded shadow-sm"
-                                                 style="width: 50px; height: 50px; object-fit: cover;"
-                                                 onerror="this.src='https://placehold.co/80x80?text=<?= urlencode($product['product_name']) ?>'">
-                                        <?php else: ?>
-                                            <div class="rounded d-flex align-items-center justify-content-center bg-light"
-                                                 style="width: 50px; height: 50px;">
-                                                <i class="fas fa-image text-muted"></i>
-                                            </div>
-                                        <?php endif; ?>
+                                        <?php 
+                                            $img = !empty($product['image']) ? $product['image'] : 'default.png';
+                                            $imgSrc = (strpos($img, 'http') === 0) ? $img : 'uploads/products/' . $img;
+                                        ?>
+                                        <img src="<?= $imgSrc ?>"
+                                            alt="<?= htmlspecialchars($product['product_name']) ?>"
+                                            class="rounded shadow-sm"
+                                            style="width: 50px; height: 50px; object-fit: cover;"
+                                            onerror="this.src='https://placehold.co/80x80?text=<?= urlencode($product['product_name']) ?>'">
                                     </td>
                                     <td class="fw-bold text-dark" style="font-size: 0.95rem;">
                                         <?= htmlspecialchars($product['product_name']) ?>

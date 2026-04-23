@@ -29,7 +29,8 @@ if (empty($dynamic_rooms)) {
             <div class="card border-0 shadow-sm p-4" style="border-radius: 28px; background: #fff;">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-4">
                     <h5 class="fw-bold mb-0">Order Summary</h5>
-                    <button class="btn btn-sm btn-light text-danger fw-bold rounded-pill px-4 border" onclick="Swal.fire({title:'Clear Cart?', icon:'warning', showCancelButton:true}).then(r=>{if(r.isConfirmed){localStorage.removeItem('user_cart'); location.reload();}})">
+                    <button class="btn btn-sm btn-light text-danger fw-bold rounded-pill px-4 border" 
+                            onclick="Swal.fire({title:'Clear Cart?', icon:'warning', showCancelButton:true}).then(r=>{if(r.isConfirmed){localStorage.removeItem('user_cart_' + (window.userId || 'guest')); location.reload();}})">
                         <i class="bi bi-trash3 me-1"></i> Clear All
                     </button>
                 </div>

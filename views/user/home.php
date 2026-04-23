@@ -61,7 +61,12 @@ if (empty($dynamic_rooms)) {
      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="product-grid">
         <?php foreach ($products as $p): 
             $img = !empty($p['image']) ? $p['image'] : 'default.png';
-            $imgURL = "/cafeteria-system-develop/uploads/products/" . $img;
+            if (strpos($img, 'http') === 0) {
+                $imgURL = $img;
+            } else {
+                $imgURL = "uploads/products/" . $img;
+            };
+            // $imgURL = "/cafeteria-system-develop/uploads/products/" . $img;
             $catName = htmlspecialchars($p['category_name'] ?? 'Beverage');
         ?>
             <div class="col product-item" data-category="<?= $catName ?>">
@@ -132,17 +137,21 @@ if (empty($dynamic_rooms)) {
     });
 });
 
- function syncRoom(val) {
-    localStorage.setItem('selected_room', val);
+function syncRoom(val) {
+    const roomKey = 'selected_room_' + (window.userId || 'guest');
+    localStorage.setItem(roomKey, val);
 }
 
  document.addEventListener('DOMContentLoaded', () => {
-    const savedRoom = localStorage.getItem('selected_room');
+     const roomKey = 'selected_room_' + (window.userId || 'guest');
+    const savedRoom = localStorage.getItem(roomKey);
     if (savedRoom) {
         const select = document.getElementById('room_select');
         if (select) select.value = savedRoom;
     } else {
-        localStorage.setItem('selected_room', document.getElementById('room_select').value);
+        const select = document.getElementById('room_select');
+        if (select)
+            localStorage.setItem(roomKey, select.value);
     }
 });
 </script>

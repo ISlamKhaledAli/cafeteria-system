@@ -74,8 +74,11 @@ require_once __DIR__ . '/../../layouts/navbar.php';
                                                 <?php foreach ($order['items'] as $item): ?>
                                                     <div class="d-flex justify-content-between align-items-center py-2 mb-2">
                                                         <div class="d-flex align-items-center gap-3 text-start">
-                                                            <?php $itemImg = !empty($item['image']) ? $item['image'] : 'default.png'; ?>
-                                                            <img src="/cafeteria-system-develop/uploads/products/<?= $itemImg ?>" 
+                                                            <?php 
+                                                                $itemImg = !empty($item['image']) ? $item['image'] : 'default.png'; 
+                                                                $imgSrc = (strpos($itemImg, 'http') === 0) ? $itemImg : 'uploads/products/' . $itemImg;
+                                                            ?>
+                                                            <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($item['name']) ?>"
                                                                  class="rounded-3 shadow-sm border border-white" style="width: 48px; height: 48px; object-fit: cover;"
                                                                  onerror="this.src='https://placehold.co/80x80?text=Food'">
                                                             <div>

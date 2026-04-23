@@ -4,7 +4,11 @@
 <div class="cart-item d-flex align-items-center justify-content-between py-4 border-bottom bg-white rounded-4 px-3 mb-2" data-id="<?= $item['id'] ?>">
     <div class="d-flex align-items-center gap-4">
         <div class="rounded-4 bg-light shadow-sm" style="width: 70px; height: 70px; overflow: hidden;">
-            <img src="<?= $item['image'] ? '/uploads/products/' . $item['image'] : 'https://placehold.co/70x70?text=Food' ?>" 
+            <?php
+                $img = !empty($item['image']) ? $item['image'] : 'default.png';
+                $imgSrc = (strpos($img, 'http') === 0) ? $img : 'uploads/products/' . $img;
+            ?>
+            <img src="<?= $imgSrc ?>" 
                  class="w-100 h-100 object-fit-cover" 
                  alt="<?= htmlspecialchars($item['name']) ?>">
         </div>
