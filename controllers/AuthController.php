@@ -20,7 +20,7 @@ function sendResetEmail($toEmail, $token) {
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'mostafamohamedsalah25@gmail.com';
-        $mail->Password = 'ogao vowz lypb ovlu'; // حط App Password هنا
+        $mail->Password = 'your_app_password'; // حط App Password هنا
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
